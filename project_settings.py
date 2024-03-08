@@ -139,9 +139,9 @@ class constants:
 
 class Particle:
     def __init__(self,pos,particle_type):
-        self.pos = pos
-        self.type = particle_type
-        self.active = False
-        self.age = 0
-        self.color = []
-        #self.velocity
+        self.pos = pos # position on the tile grid
+        self.type = particle_type # how the tile moves
+        self.active = False # if the particle should calculate movement in the current frame (for optimisation)
+        self.age = 0 # lifetime of the particle in frames, used for particle decay
+        self.color = [] # rgb colour value of this particle (for the slightly random colour)
+        self.velocity = [0,0] # EXPERIMENTAL used to simulate waves in fluids, or explosions / wind in other materials

@@ -44,12 +44,20 @@ def clear_cell(particle:Particle,pos:list) -> None:
     del grid[str(pos)]
 
 # function that moves "active" particles following a simple pattern
-def move_particle(particle:Particle) -> dict: # its possible particles can move twice if they were displaced by another particle falling and then they moved, this probably can be fixed with a "moved" bool property that says if the particle moved that frame already
+def move_particle(particle:Particle) -> dict:
     global moved
     moved = False
+    
+# simulate (very) simple waves for fluids, or random for powders (which makes them behave naturally still)
     direction = randint(0,1)
     if direction == 0:
         direction = -1
+    if particle_types[particle.type]['move_type'] == 'fluid':
+        if particle.velocity[0] == 0 and particle.active:
+            particle.velocity[0] = direction
+        elif particle.velocity[0] != 0:
+            direction = particle.velocity[0]
+            
     neighbors = { # left/right is relative to which dir was picked to go first by the randint
         'down' : [particle.pos[0],particle.pos[1]+1],
         'downdiagonal1' : [particle.pos[0]+direction,particle.pos[1]+1],
@@ -59,6 +67,14 @@ def move_particle(particle:Particle) -> dict: # its possible particles can move 
         'up' : [particle.pos[0],particle.pos[1]-1],
         'updiagonal1' : [particle.pos[0]+direction,particle.pos[1]-1],
         'updiagonal2' : [particle.pos[0]-direction,particle.pos[1]-1]}
+    
+    if str(neighbors['side1']) in grid.keys():
+        direction = 0 - direction
+    
+    
+
+    
+    
 
     if not str(neighbors['down']) in grid.keys() and particle_types[particle.type]['density'] > 0:
         clear_cell(particle,particle.pos)
