@@ -164,7 +164,7 @@ def reaction_check(p:Particle,neighbors:dict) -> None:
                                         del x
                                         create_particle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
                                         for m in neighbors.values():
-                                            if not m.type == 'static':
+                                            if not particle_types[m.type]['move_type'] == 'static':
                                                 m.active = True
                                             
                 else:
