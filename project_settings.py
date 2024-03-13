@@ -25,7 +25,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'move_type':'fluid',
         'color':(50,50,255),
         'density':1 ,
-        'reactions':[],
+        'reactions':[4],
         'decay':None,
         'move_resistance':2
     },
@@ -43,7 +43,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'move_type':'fluid',
         'color':(235,110,52),
         'density':-1,
-        'reactions':[0,1,2],
+        'reactions':[0,1,2,3,4],
         'decay':[5,8] 
     },
     {
@@ -69,7 +69,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'move_type':'static',
         'color':(235,110,52),
         'density':100,
-        'reactions':[],
+        'reactions':[0,1,2,3,4],
         'decay':[4,20],
         'move_resistance':1
     },
@@ -87,7 +87,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'move_type':'fluid',
         'color':(235,110,52),
         'density':0.9,
-        'reactions':[],
+        'reactions':[0,1,2,3,4],
         'decay':[4,20],
         'move_resistance':1
     },
@@ -99,6 +99,15 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'reactions':[3],
         'decay':None,
         'move_resistance':10
+    },
+    {
+        'name':'vapour', # 11
+        'move_type':'fluid',
+        'color':(220,220,255),
+        'density':-1,
+        'reactions':[],
+        'decay':[-1,20],
+        'move_resistance':1
     }
 ]
 reactions = [
@@ -125,6 +134,12 @@ reactions = [
         'reactants':[[0,4],[0,7],[0,9]],
         'products':[10,-2],
         'reaction_difficulty':50
+    },
+    {
+        'name':'water evaporation', # 4
+        'reactants':[[2,4],[2,7],[2,9]],
+        'products':[11,-2],
+        'reaction_difficulty':1
     }
 ]
 
