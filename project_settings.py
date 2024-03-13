@@ -7,7 +7,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'move_type':'powder', # how the particle moves
         'color':(235,225,52), # average particle colour
         'density':1.6, # how dense the particle is
-        'reactions':[], # list of reactions it is a part of (just for optimisation)
+        'reactions':[3], # list of reactions it is a part of (just for optimisation)
         'decay':None, # what it will decay into after amount of frames [decay_into,decay_min_age]
         'move_resistance':1 # EXPERIMENTAL how resistant it is to movement & explosions
     },
@@ -124,7 +124,7 @@ reactions = [
         'name':'glass forging', # 3
         'reactants':[[0,4],[0,7],[0,9]],
         'products':[10,-2],
-        'reaction_difficulty':2
+        'reaction_difficulty':50
     }
 ]
 
