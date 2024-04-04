@@ -22,6 +22,7 @@
     <Compile Include="main.py" />
     <Compile Include="particle_functions.py" />
     <Compile Include="project_settings.py" />
+    <Compile Include="pseudo_random.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>

@@ -9,7 +9,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':1.6, # how dense the particle is
         'reactions':[3], # list of reactions it is a part of (just for optimisation)
         'decay':None, # what it will decay into after amount of frames [decay_into,decay_min_age]
-        'move_resistance':1 # EXPERIMENTAL how resistant it is to movement & explosions
     },
     {
         'name':'wall', # 1
@@ -18,7 +17,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':100, # infinity
         'reactions':[],
         'decay':None,
-        'move_resistance':100
     },
     {
         'name':'water', # 2
@@ -27,7 +25,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':1 ,
         'reactions':[4],
         'decay':None,
-        'move_resistance':2
     },
     {
         'name':'hydrogen', # 3
@@ -36,7 +33,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':-1,
         'reactions':[0],
         'decay':None,
-        'move_resistance':1
     },
     {
         'name':'fire_gas', # 4
@@ -53,7 +49,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':-1,
         'reactions':[],
         'decay':[-1,24],
-        'move_resistance':1
     },
     {
         'name':'wood', # 6
@@ -62,7 +57,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':100, # all solids density is max
         'reactions':[1],
         'decay':None,
-        'move_resistance':3
     },
     {
         'name':'fire_solid', # 7
@@ -71,7 +65,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':100,
         'reactions':[0,1,2,3,4],
         'decay':[4,20],
-        'move_resistance':1
     },
     {
         'name':'oil', # 8
@@ -80,7 +73,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':0.7,
         'reactions':[2],
         'decay':None,
-        'move_resistance':2
     },
     {
         'name':'fire_liquid', # 9
@@ -89,7 +81,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':0.9,
         'reactions':[0,1,2,3,4],
         'decay':[4,20],
-        'move_resistance':1
     },
     {
         'name':'glass', # 10
@@ -98,7 +89,6 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'density':2.5,
         'reactions':[3],
         'decay':None,
-        'move_resistance':10
     },
     {
         'name':'vapour', # 11
@@ -106,8 +96,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
         'color':(220,220,255),
         'density':-1,
         'reactions':[],
-        'decay':[-1,20],
-        'move_resistance':1
+        'decay':[2,40],
     }
 ]
 reactions = [
@@ -139,7 +128,7 @@ reactions = [
         'name':'water evaporation', # 4
         'reactants':[[2,4],[2,7],[2,9]],
         'products':[11,-2],
-        'reaction_difficulty':1
+        'reaction_difficulty':100
     }
 ]
 
@@ -147,16 +136,19 @@ class constants:
     WIDTH, HEIGHT = 1000, 500
     RESOLUTION = (WIDTH, HEIGHT)
     BACKGROUND = (0,0,0)
-    FPS = 30
+    FPS = 9999
     DISPLAY = pygame.display.set_mode((WIDTH,HEIGHT))
     CLOCK = pygame.time.Clock()
-    CELLSIZE = 10
+    CELLSIZE = 20
+    FLUID_STICKINESS = 1.5
 
 class Particle:
     def __init__(self,pos,particle_type):
         self.pos = pos # position on the tile grid
-        self.type = particle_type # how the tile moves
+        self.type = particle_type # what the particle is made of
         self.active = False # if the particle should calculate movement in the current frame (for optimisation)
         self.age = 0 # lifetime of the particle in frames, used for particle decay
         self.color = [] # rgb colour value of this particle (for the slightly random colour)
-        self.velocity = [0,0] # EXPERIMENTAL used to simulate waves in fluids, or explosions / wind in other materials
+        self.fill = 1 # EXPERIMENTAL used for simulating much more advanced fluid physics
+        self.prevFill = 1 # EXPERIMENTAL used in conjunction with "self.active" to help with optimisation
+        self.shownFill = 1 # EXPERIMENTAL used to show fill, but will be full or empty depending on if there's other particles above, if its falling etc

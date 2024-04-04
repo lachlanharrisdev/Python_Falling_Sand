@@ -1,9 +1,16 @@
+# hello zigglezord
+# TODO:
+# 1. add the new fluid physics to particles with negative density
+# 2. optimise (and add more necessary) ways that stats are transferred to newly created particles (such as fill level, age, etc)
+# probably more but rn i'm lazy
+# you're gonna cringe reading this, cry abt it
+
 from particle_functions import *
 from project_settings import *
 import pygame, sys
 from random import randint
 
-grid = {} # format: {cell:obj, cell2:obj2}
+grid = {} # format: {cell pos x, cell pos y}
 dragging = False
 selected_particle = 0
 cursor_size = 1
@@ -18,7 +25,7 @@ class Game:
         self.new_game()
         
     def new_game(self):
-         for x in range(int(constants.WIDTH/constants.CELLSIZE)):
+        for x in range(int(constants.WIDTH/constants.CELLSIZE)):
             create_particle(Particle([x,int(constants.HEIGHT/constants.CELLSIZE)-1],1))
             create_particle(Particle([x,0],1))
             for y in range(int(constants.HEIGHT/constants.CELLSIZE)):
@@ -63,7 +70,7 @@ class Game:
                 else:
                     selected_particle = 0
                 print(particle_types[selected_particle]['name'].upper())
-            elif event.key == pygame.K_EQUALS:
+            elif event.key == pygame.K_EQUALS and cursor_size < 3:
                 cursor_size += 1
             elif event.key == pygame.K_MINUS and cursor_size > 1:
                 cursor_size -= 1
