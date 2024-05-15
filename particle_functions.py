@@ -32,7 +32,10 @@ def create_particle(particle:Particle):
 def set_cell(particle:Particle,pos:list):
     grid[str(pos)] = particle
     particle.pos = pos
-    particle.fill = 1
+    
+    if particle_types[particle.type]['move_type'] == 'fluid':
+        particle.fill = 0.5 / constants.FLUID_STICKINESS
+        
     neighbours = [[particle.pos[0],particle.pos[1]+1],[particle.pos[0]+1,particle.pos[1]+1],[particle.pos[0]-1,particle.pos[1]+1],[particle.pos[0]+1,particle.pos[1]],[particle.pos[0]-1,particle.pos[1]],[particle.pos[0],particle.pos[1]-1],[particle.pos[0]+1,particle.pos[1]-1],[particle.pos[0]-1,particle.pos[1]-1]]
     if particle_types[particle.type]['move_type'] != 'static':
         particle.active = True
@@ -149,11 +152,14 @@ def move_particle(particle:Particle) -> dict:
             # set_cell(particle,neighbours['side1'])
             create_particle(Particle(neighbours['side1'],particle.type))
             grid[str(neighbours['side1'])].age = particle.age
-            grid[str(neighbours['side1'])].fill = particle.fill / 2
-            particle.fill = particle.fill / 2
+            # grid[str(neighbours['side1'])].fill = particle.fill / 2
+            # particle.fill = particle.fill / 2
+            diff = clamp(particle.fill - grid[str(neighbours['side1'])].fill,0,0.5) / constants.FLUID_STICKINESS
+            grid[str(neighbours['side1'])].fill = diff
+            particle.fill -= diff
             moved=True
-        elif grid[str(neighbours['side1'])].type == particle.type:
-            diff = (particle.fill - grid[str(neighbours['side1'])].fill) / constants.FLUID_STICKINESS
+        elif str(neighbours['side1']) in grid.keys() and grid[str(neighbours['side1'])].type == particle.type and not moved:
+            diff = clamp(particle.fill - grid[str(neighbours['side1'])].fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side1'])].fill += diff
             particle.fill -= diff
             moved=True
@@ -162,11 +168,15 @@ def move_particle(particle:Particle) -> dict:
             # set_cell(particle,neighbours['side2'])
             create_particle(Particle(neighbours['side2'],particle.type))
             grid[str(neighbours['side2'])].age = particle.age
-            grid[str(neighbours['side2'])].fill = particle.fill / 2
-            particle.fill = particle.fill / 2
+            # grid[str(neighbours['side2'])].fill = particle.fill / 2
+            # particle.fill = particle.fill / 2
+
+            diff = clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
+            grid[str(neighbours['side2'])].fill = diff
+            particle.fill -= diff
             moved=True
-        elif grid[str(neighbours['side2'])].type == particle.type:
-            diff = (particle.fill - grid[str(neighbours['side2'])].fill) / constants.FLUID_STICKINESS
+        elif str(neighbours['side2']) in grid.keys() and grid[str(neighbours['side2'])].type == particle.type and not moved:
+            diff = clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side2'])].fill += diff
             particle.fill -= diff
             moved=True
@@ -175,12 +185,12 @@ def move_particle(particle:Particle) -> dict:
             if not str(neighbours['up']) in grid.keys():
                 create_particle(Particle(neighbours['side1'],particle.type))
                 grid[str(neighbours['up'])].fill = particle.fill-1
-                particle.fill -= particle.fill-1
+                particle.fill = 1
                 moved=True
             
         particle.shownFill = particle.fill
         
-        if str(neighbours['up']) in grid.keys() or not str(neighbours['down']) in grid.keys():
+        if not str(neighbours['down']) in grid.keys():
             particle.shownFill = 1
         if particle.fill <= 0:
             clear_cell(particle, particle.pos)

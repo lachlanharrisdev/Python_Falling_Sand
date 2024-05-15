@@ -136,11 +136,11 @@ class constants:
     WIDTH, HEIGHT = 1000, 500
     RESOLUTION = (WIDTH, HEIGHT)
     BACKGROUND = (0,0,0)
-    FPS = 9999
+    FPS = 30
     DISPLAY = pygame.display.set_mode((WIDTH,HEIGHT))
     CLOCK = pygame.time.Clock()
     CELLSIZE = 20
-    FLUID_STICKINESS = 1.5
+    FLUID_STICKINESS = 1.3
 
 class Particle:
     def __init__(self,pos,particle_type):
