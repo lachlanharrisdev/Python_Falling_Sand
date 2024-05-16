@@ -3,6 +3,7 @@ import pygame, sys
 import random
 from main import *
 
+_rand = 0.5
 def create_particle(particle:Particle):
     # places the particle in the main grid
     grid[str(particle.pos)] = particle
@@ -12,8 +13,12 @@ def create_particle(particle:Particle):
     particle.fill = 1
         
     # sets a slightly random colour to the particle
-    particle.color = []
+    particle.color = [particle_types[particle.type]['color']]
+    
+    # RANDOM COLOUR REMOVED DUE TO PERFORMANCE DEGRADE WHEN CREATING PARTICLES
+    '''
     for i in particle_types[particle.type]['color']:
+        
         sign = random.getrandbits(4) # using getrandbits because it is more optimised (main bottleneck of this function is getting a random number)
         multi = sign
         if sign < 8:
@@ -25,8 +30,9 @@ def create_particle(particle:Particle):
             value = 255
         if value < 0:
             value = 0
-        
-        particle.color.append(value)
+
+        particle.color.append(i)'''
+
 
 # function to set a certain grid cell to a particle, used in reactions or when user manuall places particles
 def set_cell(particle:Particle,pos:list):
