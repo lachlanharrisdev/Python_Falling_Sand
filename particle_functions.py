@@ -199,8 +199,8 @@ def move_particle(particle:Particle) -> dict:
         
         #if not str(neighbours['down']) in grid.keys():
         #    particle.shownFill = 1
-        if str(neighbours['up']) in grid.keys() and grid[str(neighbours['up'])].type == particle.type:
-            particle.shownFill = 1
+        #if str(neighbours['up']) in grid.keys() and grid[str(neighbours['up'])].type == particle.type:
+        #    particle.shownFill = 1
         if particle.fill <= 0.01:
             ClearCell(particle, particle.pos)
         elif particle.fill < 1:
@@ -241,8 +241,10 @@ def reaction_check(p:Particle,neighbours:dict):
                                     elif reactions[r]['products'][i.index(x.type)] == -2:
                                         continue
                                     else:
-                                        if grid[str(x.pos)] != None:
-                                                del grid[str(x.pos)]
+                                        try:
+                                            del grid[str(x.pos)]
+                                        except:
+                                            pass
                                         pos = x.pos
                                         old_type = x.type
                                         del x
