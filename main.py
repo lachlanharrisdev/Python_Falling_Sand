@@ -37,7 +37,7 @@ class Game:
     def Update(self):
         pygame.display.flip()
         self.clock.tick(constants.FPS)
-        pygame.display.set_caption(f'{self.clock.get_fps()}')
+        pygame.display.set_caption(f'FPS: {self.clock.get_fps()}   Particle: {particleTypes[selected_particle]['name'].upper()}')
         self.GameLoop()
         
     def GameLoop(self):
