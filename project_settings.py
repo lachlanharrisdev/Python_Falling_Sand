@@ -5,7 +5,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'sand', # 0
         'move_type':'powder', # how the particle moves
-        'color':(235,225,52), # average particle colour
+        'colour':(235,225,52), # average particle colour
         'density':1.6, # how dense the particle is
         'reactions':[3], # list of reactions it is a part of (just for optimisation)
         'decay':None, # what it will decay into after amount of frames [decay_into,decay_min_age]
@@ -13,7 +13,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'wall', # 1
         'move_type':'static',
-        'color':(100,100,100),
+        'colour':(100,100,100),
         'density':100, # infinity
         'reactions':[],
         'decay':None,
@@ -21,7 +21,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'water', # 2
         'move_type':'fluid',
-        'color':(50,50,255),
+        'colour':(50,50,255),
         'density':1 ,
         'reactions':[4],
         'decay':None,
@@ -29,7 +29,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'hydrogen', # 3
         'move_type':'fluid',
-        'color':(200,50,50),
+        'colour':(200,50,50),
         'density':-1,
         'reactions':[0],
         'decay':None,
@@ -37,7 +37,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'fire_gas', # 4
         'move_type':'fluid',
-        'color':(235,110,52),
+        'colour':(235,110,52),
         'density':-1,
         'reactions':[0,1,2,3,4],
         'decay':[5,8] 
@@ -45,7 +45,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'smoke', # 5
         'move_type':'fluid',
-        'color':(75,75,75),
+        'colour':(75,75,75),
         'density':-1,
         'reactions':[],
         'decay':[-1,24],
@@ -53,7 +53,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'wood', # 6
         'move_type':'static',
-        'color':(168,100,50),
+        'colour':(168,100,50),
         'density':100, # all solids density is max
         'reactions':[1],
         'decay':None,
@@ -61,7 +61,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'fire_solid', # 7
         'move_type':'static',
-        'color':(235,110,52),
+        'colour':(235,110,52),
         'density':100,
         'reactions':[0,1,2,3,4],
         'decay':[4,20],
@@ -69,7 +69,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'oil', # 8
         'move_type':'fluid',
-        'color':(168,133,50),
+        'colour':(168,133,50),
         'density':0.7,
         'reactions':[2],
         'decay':None,
@@ -77,7 +77,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'fire_liquid', # 9
         'move_type':'fluid',
-        'color':(235,110,52),
+        'colour':(235,110,52),
         'density':0.9,
         'reactions':[0,1,2,3,4],
         'decay':[4,20],
@@ -85,7 +85,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'glass', # 10
         'move_type':'static',
-        'color':(240,240,255),
+        'colour':(240,240,255),
         'density':2.5,
         'reactions':[3],
         'decay':None,
@@ -93,7 +93,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     {
         'name':'vapour', # 11
         'move_type':'fluid',
-        'color':(220,220,255),
+        'colour':(220,220,255),
         'density':-1,
         'reactions':[],
         'decay':[2,40],
@@ -148,7 +148,7 @@ class Particle:
         self.type = particle_type # what the particle is made of
         self.active = False # if the particle should calculate movement in the current frame (for optimisation)
         self.age = 0 # lifetime of the particle in frames, used for particle decay
-        self.color = [] # rgb colour value of this particle (for the slightly random colour)
+        self.colour = [] # rgb colour value of this particle (for the slightly random colour)
         self.fill = 1 # EXPERIMENTAL used for simulating much more advanced fluid physics
         self.prevFill = 1 # EXPERIMENTAL used in conjunction with "self.active" to help with optimisation
         self.shownFill = 1 # EXPERIMENTAL used to show fill, but will be full or empty depending on if there's other particles above, if its falling etc

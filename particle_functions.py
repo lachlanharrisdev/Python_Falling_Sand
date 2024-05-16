@@ -13,11 +13,11 @@ def create_particle(particle:Particle):
     particle.fill = 1
         
     # sets a slightly random colour to the particle
-    particle.color = [particle_types[particle.type]['color']]
+    particle.colour = [particle_types[particle.type]['colour']]
     
     # RANDOM COLOUR REMOVED DUE TO PERFORMANCE DEGRADE WHEN CREATING PARTICLES
     '''
-    for i in particle_types[particle.type]['color']:
+    for i in particle_types[particle.type]['colour']:
         
         sign = random.getrandbits(4) # using getrandbits because it is more optimised (main bottleneck of this function is getting a random number)
         multi = sign
@@ -31,7 +31,7 @@ def create_particle(particle:Particle):
         if value < 0:
             value = 0
 
-        particle.color.append(i)'''
+        particle.colour.append(i)'''
 
 
 # function to set a certain grid cell to a particle, used in reactions or when user manuall places particles
@@ -257,7 +257,7 @@ def update_world():
         if p.active:
             neighbours = move_particle(p)
             reaction_check(p,neighbours)
-            #pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE))
+            #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE))
         if particle_types[p.type]['decay'] != None:
             if p.age > particle_types[p.type]['decay'][1] and randint(0,4) == 0:
                 if particle_types[p.type]['decay'][0] != -1:
@@ -279,8 +279,8 @@ def update_world():
                     continue
         p.age += 1
         if particle_types[p.type]['density'] < 0: # personally, gases look better as a solid colour but normal particles look better with varied colour
-            p.color = []
-            for i in particle_types[p.type]['color']:
+            p.colour = []
+            for i in particle_types[p.type]['colour']:
                 sign = random.getrandbits(4) # using getrandbits because it is more optimised (main bottleneck of this function is getting a random number)
                 multi = sign
                 if sign < 8:
@@ -292,7 +292,7 @@ def update_world():
                     value = 255
                 if value < 0:
                     value = 0
-                p.color.append(value)
+                p.colour.append(value)
                 
         if p.prevFill != p.fill:
             p.active = True
@@ -301,14 +301,14 @@ def update_world():
         _fill = clamp(round(p.shownFill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
         '''
         if particle_types[p.type]['density'] >= 0:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
         else:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1+_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1+_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
         '''
         if particle_types[p.type]['move_type'] == 'fluid':
-            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
         else:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1])*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE))
+            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1])*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE))
 
 # basic clamp function which I use surprisingly a lot, clamps x to between y (the low) & z (the high)
 def clamp(x,y,z) -> float:
