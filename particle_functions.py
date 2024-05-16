@@ -2,6 +2,7 @@ from project_settings import *
 import pygame, sys
 import random
 from main import *
+import threading
 
 _rand = 0.5
 def CreateParticle(particle:Particle):
@@ -257,8 +258,46 @@ def reaction_check(p:Particle,neighbours:dict):
 def UpdateWorld():
     particles = list(grid.values())
     neighbours = {}
+    # multithreading attempt 2: (first organise each p into their columns, THEN do a function similar to original before mt, but for each column per thread)
+    _dict = {}
     for p in particles:
-        if p.active:
+        _dict.update({str(p.pos),round(p.pos[0] / (constants.WIDTH / constants.CELLSIZE) * 3)})
+    for d in _dict.keys():
+        
+    # multithreading attempt 1:
+'''
+    _t1 = None
+    _t2 = None
+    _t3 = None
+    _t4 = None
+    _i = 1
+    for p in particles:
+        _posx = round(p.pos[0] / (constants.WIDTH / constants.CELLSIZE) * 3)
+        if _posx == 0:
+            _t1 = threading.Thread(target=UpdateIndividualParticle, args=(p,))
+            _t1.start()
+        elif _posx == 1:
+            _t2 = threading.Thread(target=UpdateIndividualParticle, args=(p,))
+            _t2.start()
+        elif _posx == 2:
+            _t3 = threading.Thread(target=UpdateIndividualParticle, args=(p,))
+            _t3.start()
+        else:
+            _t4 = threading.Thread(target=UpdateIndividualParticle, args=(p,))
+            _t4.start()
+    
+    _t1.join()
+    _t2.join()
+    _t3.join()
+    _t4.join()
+    '''
+    
+        
+
+def UpdateIndividualParticle(p:Particle,t:int):
+    
+    if p != None:
+        elif p.active:
             neighbours = move_particle(p)
             reaction_check(p,neighbours)
             if p.pos[1] < -1:
@@ -279,10 +318,8 @@ def UpdateWorld():
                     old_type = p.type
                     del p
                     CreateParticle(Particle(pos,particleTypes[old_type]['decay'][0]))
-                    continue
                 else:
                     del p
-                    continue
         p.age += 1
         if particleTypes[p.type]['density'] < 0: # personally, gases look better as a solid colour but normal particles look better with varied colour
             p.colour = []
