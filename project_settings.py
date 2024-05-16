@@ -140,7 +140,7 @@ class constants:
     DISPLAY = pygame.display.set_mode((WIDTH,HEIGHT))
     CLOCK = pygame.time.Clock()
     CELLSIZE = 20
-    FLUID_STICKINESS = 1.3
+    FLUID_STICKINESS = 1.2
 
 class Particle:
     def __init__(self,pos,particle_type):

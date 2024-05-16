@@ -73,6 +73,7 @@ def move_particle(particle:Particle) -> dict:
         'updiagonal1' : [particle.pos[0]+direction,particle.pos[1]-1],
         'updiagonal2' : [particle.pos[0]-direction,particle.pos[1]-1]}
     
+        # go opposite direction if the random direction has a particle there
     if str(neighbours['side1']) in grid.keys():
         direction = 0 - direction
     
@@ -139,8 +140,8 @@ def move_particle(particle:Particle) -> dict:
     
         
 
-    # physics for FLUID particles (implementing the fill level & pressure simulation)
-    elif particle_types[particle.type]['move_type'] == 'fluid':
+    # physics for FLUID particles (implementing the fill level & pressure simulation) (TEMPORARILY DISABLED FOR GASES)
+    elif particle_types[particle.type]['move_type'] == 'fluid' and particle_types[particle.type]['density'] > 0:
         if particle_types[particle.type]['density'] > 0 and grid[str(neighbours['down'])].type == particle.type and grid[str(neighbours['down'])].fill < 1:
             diff = clamp(1 - grid[str(neighbours['down'])].fill,0,particle.fill)
             grid[str(neighbours['down'])].fill += diff
@@ -158,7 +159,7 @@ def move_particle(particle:Particle) -> dict:
             grid[str(neighbours['side1'])].fill = diff
             particle.fill -= diff
             moved=True
-        elif str(neighbours['side1']) in grid.keys() and grid[str(neighbours['side1'])].type == particle.type and not moved:
+        elif str(neighbours['side1']) in grid.keys() and grid[str(neighbours['side1'])].type == particle.type: # and not moved:
             diff = clamp(particle.fill - grid[str(neighbours['side1'])].fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side1'])].fill += diff
             particle.fill -= diff
@@ -175,13 +176,13 @@ def move_particle(particle:Particle) -> dict:
             grid[str(neighbours['side2'])].fill = diff
             particle.fill -= diff
             moved=True
-        elif str(neighbours['side2']) in grid.keys() and grid[str(neighbours['side2'])].type == particle.type and not moved:
+        elif str(neighbours['side2']) in grid.keys() and grid[str(neighbours['side2'])].type == particle.type: # and not moved:
             diff = clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side2'])].fill += diff
             particle.fill -= diff
             moved=True
             
-        if particle.fill > 1:
+        elif particle.fill > 1:
             if not str(neighbours['up']) in grid.keys():
                 create_particle(Particle(neighbours['side1'],particle.type))
                 grid[str(neighbours['up'])].fill = particle.fill-1
@@ -190,14 +191,26 @@ def move_particle(particle:Particle) -> dict:
             
         particle.shownFill = particle.fill
         
-        if not str(neighbours['down']) in grid.keys():
-            particle.shownFill = 1
-        if particle.fill <= 0:
+        #if not str(neighbours['down']) in grid.keys():
+        #    particle.shownFill = 1
+        if particle.fill <= 0.01:
             clear_cell(particle, particle.pos)
         elif particle.fill < 1:
             particle.active = True
         elif particle.fill == 1:
             particle.active = False
+            
+    elif particle_types[particle.type]['density'] < 0:
+        if not str(neighbours['side1']) in grid.keys():
+            clear_cell(particle,particle.pos)
+            set_cell(particle,neighbours['side1'])
+            moved=True
+            
+        if not str(neighbours['side2']) in grid.keys():
+            clear_cell(particle,particle.pos)
+            set_cell(particle,neighbours['side2'])
+            moved=True
+
     if not moved:
         particle.active = False
     return neighbours
@@ -252,7 +265,10 @@ def update_world():
                     create_particle(Particle(pos,particle_types[old_type]['decay'][0]))
                     continue
                 else:
-                    del grid[str(p.pos)]
+                    try:
+                        del grid[str(p.pos)]
+                    except:
+                        pass
                     del p
                     continue
         p.age += 1
@@ -277,7 +293,16 @@ def update_world():
             p.prevFill = p.fill
         #if p.active: 
         _fill = clamp(round(p.shownFill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
-        pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+        '''
+        if particle_types[p.type]['density'] >= 0:
+            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+        else:
+            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1+_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+        '''
+        if particle_types[p.type]['move_type'] == 'fluid':
+            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+        else:
+            pygame.draw.rect(constants.DISPLAY,tuple(p.color),(p.pos[0]*constants.CELLSIZE,(p.pos[1])*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE))
 
 # basic clamp function which I use surprisingly a lot, clamps x to between y (the low) & z (the high)
 def clamp(x,y,z) -> float:
