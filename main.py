@@ -1,7 +1,8 @@
 # hello zigglezord
 # TODO:
-# 1. add the new fluid physics to particles with negative density
-# 2. optimise (and add more necessary) ways that stats are transferred to newly created particles (such as fill level, age, etc)
+# 1. add the new fluid physics to particles with negative density --ABANDONED
+# 2. optimise (and add more necessary) ways that stats are transferred to newly created particles (such as fill level, age, etc) --DONE
+# 3. explosion physics & velocity simulation???
 # probably more but rn i'm lazy
 # you're gonna cringe reading this, cry abt it
 
@@ -22,9 +23,10 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode(constants.RESOLUTION)
         self.clock = pygame.time.Clock()
-        self.new_game()
+        self.NewGame()
         
-    def new_game(self):
+# generate wall border around game
+    def NewGame(self):
         for x in range(int(constants.WIDTH/constants.CELLSIZE)):
             CreateParticle(Particle([x,int(constants.HEIGHT/constants.CELLSIZE)-1],1))
             CreateParticle(Particle([x,0],1))
@@ -32,13 +34,13 @@ class Game:
                 CreateParticle(Particle([0,y],1))
                 CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))
     
-    def update(self):
+    def Update(self):
         pygame.display.flip()
         self.clock.tick(constants.FPS)
         pygame.display.set_caption(f'{self.clock.get_fps()}')
-        self.main_loop()
+        self.GameLoop()
         
-    def main_loop(self):
+    def GameLoop(self):
         global cursor_rect
         pygame.display.update()
         for event in pygame.event.get():
@@ -46,14 +48,14 @@ class Game:
                 pygame.quit()
                 sys.exit()
             else:
-                self.handle_input(event)
+                self.HandleInput(event)
         constants.DISPLAY.fill(constants.BACKGROUND)
-        update_world()
+        UpdateWorld()
         cursor_rect = pygame.Rect((pygame.mouse.get_pos()[0]//constants.CELLSIZE)*constants.CELLSIZE,(pygame.mouse.get_pos()[1]//constants.CELLSIZE)*constants.CELLSIZE,constants.CELLSIZE*cursor_size,constants.CELLSIZE*cursor_size)
         pygame.draw.rect(constants.DISPLAY,(200,200,200),cursor_rect) # to add alpha this has to be a surface that is blitted to the screen
         constants.CLOCK.tick(constants.FPS)
         
-    def handle_input(self, event:pygame.event):
+    def HandleInput(self, event:pygame.event):
         global dragging
         global selected_particle
         global cursor_size
@@ -81,7 +83,7 @@ class Game:
         
     def run(self):
         while True:
-            self.update()
+            self.Update()
 
 if __name__ == '__main__':
     game = Game()

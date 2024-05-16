@@ -104,36 +104,36 @@ reactions = [
         'name':'hydrogen combust', # 0
         'reactants':[[3,4],[3,7],[3,9]], # list of combinations of elements that cause reaction
         'products':[4,-2], # what the particle turns into
-        'reaction_difficulty':1 # lower the number, the higher the chance of reaction occuring per frame
+        'reactionDifficulty':1 # lower the number, the higher the chance of reaction occuring per frame
     },
     {
         'name':'wood combust', # 1
         'reactants':[[6,4],[6,7],[6,9]],
         'products':[7,-2],
-        'reaction_difficulty':7
+        'reactionDifficulty':7
     },
     {
         'name':'oil combust', # 2
         'reactants':[[8,4],[8,7],[8,9]],
         'products':[9,-2],
-        'reaction_difficulty':4
+        'reactionDifficulty':4
     },
     {
         'name':'glass forging', # 3
         'reactants':[[0,4],[0,7],[0,9]],
         'products':[10,-2],
-        'reaction_difficulty':50
+        'reactionDifficulty':50
     },
     {
         'name':'water evaporation', # 4
         'reactants':[[2,4],[2,7],[2,9]],
         'products':[11,-2],
-        'reaction_difficulty':100
+        'reactionDifficulty':100
     }
 ]
 
 class constants:
-    WIDTH, HEIGHT = 1000, 500
+    WIDTH, HEIGHT = 1300, 720
     RESOLUTION = (WIDTH, HEIGHT)
     BACKGROUND = (0,0,0)
     FPS = 30

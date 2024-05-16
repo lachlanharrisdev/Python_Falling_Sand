@@ -199,11 +199,13 @@ def move_particle(particle:Particle) -> dict:
         
         #if not str(neighbours['down']) in grid.keys():
         #    particle.shownFill = 1
+        if str(neighbours['up']) in grid.keys() and grid[str(neighbours['up'])].type == particle.type:
+            particle.shownFill = 1
         if particle.fill <= 0.01:
             ClearCell(particle, particle.pos)
         elif particle.fill < 1:
             particle.active = True
-        elif particle.fill == 1:
+        elif particle.fill >= 1:
             particle.active = False
             
     elif particleTypes[particle.type]['density'] < 0:
@@ -230,7 +232,7 @@ def reaction_check(p:Particle,neighbours:dict):
                         if str(n) in grid.keys() and p.type == grid[str(n)].type:
                             continue
                         elif str(n) in grid.keys() and grid[str(n)].type in i:
-                            if randint(0,int(round(reactions[r]['reaction_difficulty']/clamp(p.fill,0.01,1)))) == 0:
+                            if randint(0,int(round(reactions[r]['reactionDifficulty']/clamp(p.fill,0.01,1)))) == 0:
                                 reactants = [p,grid[str(n)]]
                                 for x in reactants:
                                     if reactions[r]['products'][i.index(x.type)] == -1:
@@ -250,31 +252,33 @@ def reaction_check(p:Particle,neighbours:dict):
                 else:
                     continue
 
-def update_world():
+def UpdateWorld():
     particles = list(grid.values())
     neighbours = {}
     for p in particles:
         if p.active:
             neighbours = move_particle(p)
             reaction_check(p,neighbours)
+            if p.pos[1] < -1:
+                try:
+                    del grid[str(p.pos)]
+                except:
+                    pass
+                del p
             #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE))
         if particleTypes[p.type]['decay'] != None:
             if p.age > particleTypes[p.type]['decay'][1] and randint(0,4) == 0:
+                try:
+                    del grid[str(p.pos)]
+                except:
+                    pass
                 if particleTypes[p.type]['decay'][0] != -1:
-                    try:
-                        del grid[str(p.pos)]
-                    except:
-                        pass
                     pos = p.pos
                     old_type = p.type
                     del p
                     CreateParticle(Particle(pos,particleTypes[old_type]['decay'][0]))
                     continue
                 else:
-                    try:
-                        del grid[str(p.pos)]
-                    except:
-                        pass
                     del p
                     continue
         p.age += 1
@@ -299,6 +303,8 @@ def update_world():
             p.prevFill = p.fill
         #if p.active: 
         _fill = clamp(round(p.shownFill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
+        
+# render fill level for gases upside down (as they should be) HOWEVER disabled due to fluid physics disable for gases
         '''
         if particleTypes[p.type]['density'] >= 0:
             pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
