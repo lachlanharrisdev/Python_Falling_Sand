@@ -26,11 +26,11 @@ class Game:
         
     def new_game(self):
         for x in range(int(constants.WIDTH/constants.CELLSIZE)):
-            create_particle(Particle([x,int(constants.HEIGHT/constants.CELLSIZE)-1],1))
-            create_particle(Particle([x,0],1))
+            CreateParticle(Particle([x,int(constants.HEIGHT/constants.CELLSIZE)-1],1))
+            CreateParticle(Particle([x,0],1))
             for y in range(int(constants.HEIGHT/constants.CELLSIZE)):
-                create_particle(Particle([0,y],1))
-                create_particle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))
+                CreateParticle(Particle([0,y],1))
+                CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))
     
     def update(self):
         pygame.display.flip()
@@ -65,11 +65,11 @@ class Game:
                 dragging = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c:
-                if not selected_particle +1 >= len(particle_types):
+                if not selected_particle +1 >= len(particleTypes):
                     selected_particle += 1
                 else:
                     selected_particle = 0
-                print(particle_types[selected_particle]['name'].upper())
+                print(particleTypes[selected_particle]['name'].upper())
             elif event.key == pygame.K_EQUALS and cursor_size < 3:
                 cursor_size += 1
             elif event.key == pygame.K_MINUS and cursor_size > 1:
@@ -77,7 +77,7 @@ class Game:
         if dragging:
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
-                    create_particle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle))
+                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle))
         
     def run(self):
         while True:

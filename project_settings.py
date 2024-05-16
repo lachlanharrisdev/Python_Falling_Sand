@@ -1,10 +1,10 @@
 import pygame, sys
 pygame.init()
 
-particle_types = [ # air has density of 0, negative values float to top, positive fall
+particleTypes = [ # air has density of 0, negative values float to top, positive fall
     {
         'name':'sand', # 0
-        'move_type':'powder', # how the particle moves
+        'moveType':'powder', # how the particle moves
         'colour':(235,225,52), # average particle colour
         'density':1.6, # how dense the particle is
         'reactions':[3], # list of reactions it is a part of (just for optimisation)
@@ -12,7 +12,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'wall', # 1
-        'move_type':'static',
+        'moveType':'static',
         'colour':(100,100,100),
         'density':100, # infinity
         'reactions':[],
@@ -20,7 +20,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'water', # 2
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(50,50,255),
         'density':1 ,
         'reactions':[4],
@@ -28,7 +28,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'hydrogen', # 3
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(200,50,50),
         'density':-1,
         'reactions':[0],
@@ -36,7 +36,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'fire_gas', # 4
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(235,110,52),
         'density':-1,
         'reactions':[0,1,2,3,4],
@@ -44,7 +44,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'smoke', # 5
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(75,75,75),
         'density':-1,
         'reactions':[],
@@ -52,7 +52,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'wood', # 6
-        'move_type':'static',
+        'moveType':'static',
         'colour':(168,100,50),
         'density':100, # all solids density is max
         'reactions':[1],
@@ -60,7 +60,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'fire_solid', # 7
-        'move_type':'static',
+        'moveType':'static',
         'colour':(235,110,52),
         'density':100,
         'reactions':[0,1,2,3,4],
@@ -68,7 +68,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'oil', # 8
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(168,133,50),
         'density':0.7,
         'reactions':[2],
@@ -76,7 +76,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'fire_liquid', # 9
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(235,110,52),
         'density':0.9,
         'reactions':[0,1,2,3,4],
@@ -84,7 +84,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'glass', # 10
-        'move_type':'static',
+        'moveType':'static',
         'colour':(240,240,255),
         'density':2.5,
         'reactions':[3],
@@ -92,7 +92,7 @@ particle_types = [ # air has density of 0, negative values float to top, positiv
     },
     {
         'name':'vapour', # 11
-        'move_type':'fluid',
+        'moveType':'fluid',
         'colour':(220,220,255),
         'density':-1,
         'reactions':[],
