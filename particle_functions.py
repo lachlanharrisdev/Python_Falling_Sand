@@ -5,7 +5,7 @@ from main import *
 
 _rand = 0.5
 def CreateParticle(particle:Particle):
-    # places the particle in the main grid
+    # creates a NEW particle & places it on the main grid, used when manually placing particles & with fluids spreading
     grid[str(particle.pos)] = particle
     if particleTypes[particle.type]['moveType'] != 'static':
         particle.active = True
@@ -34,12 +34,12 @@ def CreateParticle(particle:Particle):
         particle.colour.append(i)'''
 
 
-# function to set a certain grid cell to a particle, used in reactions or when user manuall places particles
+# function to set a certain grid cell to a PRE-EXISTING particle, used when moving powders, swapping particles with density differences & reactions
 def SetCell(particle:Particle,pos:list):
     grid[str(pos)] = particle
     particle.pos = pos
     
-    if particleTypes[particle.type]['moveType'] == 'fluid':
+    if particleTypes[particle.type]['moveType'] == 'fluid': # when fluids are splitting into new particles to spread, this line ensures no extra fluid is created
         particle.fill = 0.5 / constants.FLUID_STICKINESS
         
     neighbours = [[particle.pos[0],particle.pos[1]+1],[particle.pos[0]+1,particle.pos[1]+1],[particle.pos[0]-1,particle.pos[1]+1],[particle.pos[0]+1,particle.pos[1]],[particle.pos[0]-1,particle.pos[1]],[particle.pos[0],particle.pos[1]-1],[particle.pos[0]+1,particle.pos[1]-1],[particle.pos[0]-1,particle.pos[1]-1]]
@@ -60,7 +60,7 @@ def ClearCell(particle:Particle,pos:list):
     del grid[str(pos)]
 
 # function to move particles based on the "rules" of this CA
-def move_particle(particle:Particle) -> dict:
+def MoveParticle(particle:Particle) -> dict:
     global moved
     moved = False
 
@@ -270,7 +270,7 @@ def UpdateWorld():
     neighbours = {}
     for p in particles:
         if p.active:
-            neighbours = move_particle(p)
+            neighbours = MoveParticle(p)
             reaction_check(p,neighbours)
             if p.pos[1] < -1:
                 try:
