@@ -3,6 +3,7 @@
 # 1. add the new fluid physics to particles with negative density --ABANDONED
 # 2. optimise (and add more necessary) ways that stats are transferred to newly created particles (such as fill level, age, etc) --DONE
 # 3. explosion physics & velocity simulation???
+# 4. fix gases
 # probably more but rn i'm lazy
 # you're gonna cringe reading this, cry abt it
 
@@ -88,5 +89,3 @@ class Game:
 if __name__ == '__main__':
     game = Game()
     game.run()
-
-
