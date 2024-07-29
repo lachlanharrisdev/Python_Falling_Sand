@@ -11,18 +11,19 @@ from particle_functions import *
 from project_settings import *
 import pygame, sys
 from random import randint
+# import pygetwindow as gw
 
 grid = {} # format: {cell pos x, cell pos y}
-dragging = False
-selected_particle = 0
-cursor_size = 1
-cursor_rect = pygame.Rect
+dragging = False # if mouse down & mouse movement is detected
+selected_particle = 0 # index of selected praticle in particleTypes
+cursor_size = 1 # size of cursor in pixels width
+cursor_rect = pygame.Rect # cursor image
 
 class Game:
     # initialise game window
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode(constants.RESOLUTION)
+        self.screen = pygame.display.set_mode(constants.RESOLUTION) # set resolution to predefined value
         self.clock = pygame.time.Clock()
         self.NewGame()
         

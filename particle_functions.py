@@ -234,7 +234,7 @@ def MoveParticle(particle:Particle) -> dict:
         particle.active = False
     return neighbours
 
-def reaction_check(p:Particle,neighbours:dict):
+def ReactionCheck(p:Particle,neighbours:dict):
     if len(particleTypes[p.type]['reactions']) > 0:
         for r in particleTypes[p.type]['reactions']:
             for i in reactions[r]['reactants']:
@@ -271,7 +271,7 @@ def UpdateWorld():
     for p in particles:
         if p.active:
             neighbours = MoveParticle(p)
-            reaction_check(p,neighbours)
+            ReactionCheck(p,neighbours)
             if p.pos[1] < -1:
                 try:
                     del grid[str(p.pos)]
