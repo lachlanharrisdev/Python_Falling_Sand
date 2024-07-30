@@ -1,6 +1,6 @@
 # hello sir
 # i've used a lot of c# coding conventions (unity) so sorry if it's confusing
-# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as update & probably more that I can't see yet
+# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as Update & probably more that I can't see yet
 # also i have used more modules than just pygame/sys but I believe they come installed with python
 # i've copied & pasted this to the top of every script just so you see this
 # pls give me bonus marks for not using AI :)
@@ -297,7 +297,7 @@ def UpdateWorld():
                 except:
                     pass
                 del p
-            #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE)) # used to draw particles BEFORE adding fluids, but deprecated as it does not render fill levels
+            #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE)) # used to draw particles BEFORE adding fluids, but deprecated as it does not Render fill levels
         if p != None and particleTypes[p.type]['decay'] != None:
             if p.age > particleTypes[p.type]['decay'][1] and randint(0,4) == 0:
                 try:
@@ -336,7 +336,7 @@ def UpdateWorld():
         #if p.active: 
         _fill = clamp(round(p.shownFill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
         
-# render fill level for gases upside down (as they should be) HOWEVER disabled due to fluid physics disabled for gases
+# Render fill level for gases upside down (as they should be) HOWEVER disabled due to fluid physics disabled for gases
         '''
         if particleTypes[p.type]['density'] >= 0:
             pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))

@@ -1,6 +1,6 @@
 # hello sir
 # i've used a lot of c# coding conventions (unity) so sorry if it's confusing
-# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as update & probably more that I can't see yet
+# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as Update & probably more that I can't see yet
 # also i have used more modules than just pygame/sys but I believe they come installed with python
 # i've copied & pasted this to the top of every script just so you see this
 # pls give me bonus marks for not using AI :)
@@ -20,6 +20,8 @@ BLACK = (2, 0, 0)
 LIGHT_GRAY = (230, 230, 232)
 GRAY = (200,200,205)
 
+SCROLL_CLAMP = (-500,0)
+
 FONT = pygame.font.SysFont('Verdana', 28)
 TITLE_FONT = pygame.font.SysFont('Verdana', 69, bold=True) # nice
 
@@ -34,33 +36,33 @@ class UIManager:
         self.current_screen = None
         self.screens = {}
 
-    def add_screen(self, name, screen):
+    def AddScreen(self, name, screen):
         self.screens[name] = screen
 
-    def set_screen(self, name):
+    def setScreen(self, name):
         self.current_screen = self.screens.get(name)
 
-    def update(self):
+    def Update(self):
         if self.current_screen:
-            self.current_screen.update()
+            self.current_screen.Update()
 
-    def render(self):
+    def Render(self):
         if self.current_screen:
-            self.current_screen.render()
+            self.current_screen.Render()
 
 # <summary>
 # an individual "screen" for each page, for now just main menu & tutorial
 # </summary>            
 class Screen:
-    def __init__(self, ui_manager):
-        self.ui_manager = ui_manager
+    def __init__(self, uiManager):
+        self.uiManager = uiManager
         self.triangles = self.create_triangles()
 
     # function for creating the background triangles, surprisingly simple for the effect it creates
     # CHANGE MADE: swapped out the repeating snake scale pattern for this, as i needed more space & padding for the buttons than I thought i'd need    
     def create_triangles(self):
         triangles = []
-        for _ in range(10):
+        for i in range(10):
             x = random.uniform(0, constants.WIDTH)
             y = random.uniform(0, constants.HEIGHT)
             size = random.uniform(100, 200)
@@ -70,13 +72,15 @@ class Screen:
             triangles.append({'pos': pygame.math.Vector2(x, y), 'size': size, 'angle': angle, 'speed': speed, 'direction': direction})
         return triangles
     
-    def update_triangles(self):
+    # Update each triangle every frame
+    def Update_triangles(self):
         for triangle in self.triangles:
             triangle['angle'] += triangle['speed']
             triangle['pos'] += triangle['direction']
             if triangle['pos'].x < -triangle['size'] or triangle['pos'].x > constants.WIDTH + triangle['size'] or triangle['pos'].y < -triangle['size'] or triangle['pos'].y > constants.HEIGHT + triangle['size']:
                 triangle['pos'] = pygame.math.Vector2(random.uniform(0, constants.WIDTH), random.uniform(0, constants.HEIGHT))
 
+    # using the python polygon function because for some reason it doesnt support triangles by default           
     def draw_triangles(self):
         for triangle in self.triangles:
             points = []
@@ -84,103 +88,104 @@ class Screen:
                 angle = triangle['angle'] + i * 2 * math.pi / 3
                 point = triangle['pos'] + pygame.math.Vector2(math.cos(angle), math.sin(angle)) * triangle['size']
                 points.append((point.x, point.y))
-            pygame.draw.polygon(self.ui_manager.screen, LIGHT_GRAY, points, width=0)
+            pygame.draw.polygon(self.uiManager.screen, LIGHT_GRAY, points, width=0)
 
-    def update(self):
-        self.update_triangles()
+    def Update(self):
+        self.Update_triangles()
 
-    def render(self):
-        self.ui_manager.screen.fill(WHITE)
+    def Render(self):
+        self.uiManager.screen.fill(WHITE)
         self.draw_triangles()
         
 # <summary>
 # main menu page derived from screen class
 # </summary>        
 class MainMenu(Screen):
-    def __init__(self, ui_manager):
-        super().__init__(ui_manager)
+    def __init__(self, uiManager):
+        super().__init__(uiManager)
         self.buttons = [
             Button("Start Game", constants.WIDTH // 2, constants.HEIGHT // 2, self.start_game),
             Button("Tutorial", constants.WIDTH // 2, constants.HEIGHT // 2 + 60, self.show_tutorial)
         ]
 
-    def update(self):
-        super().update()
+    def Update(self):
+        super().Update()
         for button in self.buttons:
-            button.update()
+            button.Update()
 
-    def render(self):
-        super().render()
+    def Render(self):
+        super().Render()
         title_surface = TITLE_FONT.render("Main Menu", True, BLACK)
-        self.ui_manager.screen.blit(title_surface, (constants.WIDTH // 2 - title_surface.get_width() // 2, 50))
+        self.uiManager.screen.blit(title_surface, (constants.WIDTH // 2 - title_surface.get_width() // 2, 50))
         for button in self.buttons:
-            button.render(self.ui_manager.screen)
+            button.Render(self.uiManager.screen)
 
     def start_game(self):
-        self.ui_manager.set_screen('main_game')
+        self.uiManager.setScreen('main_game')
 
     def show_tutorial(self):
-        self.ui_manager.set_screen('tutorial')
+        self.uiManager.setScreen('tutorial')
 
 # <summary>
 # tutorial page derived from screen class, like main menu
 # </summary>        
 class Tutorial(Screen):
-    def __init__(self, ui_manager):
-        super().__init__(ui_manager)
-        self.text = "This is the tutorial. Scroll to read more."
-        #self.images = [pygame.image.load('example.png')]  # Replace with your own images
-        self.scroll_offset = 0
-        self.back_button = Button("Back", 60, 30, self.go_back)
+    def __init__(self, uiManager):
+        super().__init__(uiManager)
+        self.text = "blah blah blah tutorial stuff"
+        #self.images = [pygame.image.load('example.png')]  # no images yet
+        self.scrollOffset = 0 # how far the user has scrolled
+        self.backButton = Button("Back", 60, 30, self.go_back)
 
-    def update(self):
-        super().update()
+    def Update(self):
+        super().Update()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
-            self.scroll_offset += 5
+            self.scrollOffset += 5
         if keys[pygame.K_DOWN]:
-            self.scroll_offset -= 5
-        self.back_button.update()
+            self.scrollOffset -= 5
+        self.scrollOffset = min(SCROLL_CLAMP[1], max(SCROLL_CLAMP[0], self.scrollOffset))
+        self.backButton.Update()
 
-    def render(self):
-        super().render()
-        y_offset = self.scroll_offset
+    def Render(self):
+        super().Render()
+        yOffset = self.scrollOffset
         try:
             for image in self.images:
-                self.ui_manager.screen.blit(image, (50, y_offset))
-                y_offset += image.get_height() + 10
+                self.uiManager.screen.blit(image, (50, yOffset))
+                yOffset += image.get_height() + 10
         except:
             # print("No images in loaded scene")
             pass 
-        text_surface = FONT.render(self.text, True, BLACK)
-        self.ui_manager.screen.blit(text_surface, (50, y_offset))
-        self.back_button.render(self.ui_manager.screen)
+        surfaceText = FONT.render(self.text, True, BLACK)
+        self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
+        self.backButton.Render(self.uiManager.screen)
         
     def go_back(self):
-        self.ui_manager.set_screen('main_menu')
+        self.uiManager.setScreen('main_menu')
 
 # <summary>
 # TEMPORARY PAGE FOR TESTING
 # will be swapped with a method of opening main.py
 # </summary>     
 class MainGame(Screen):
-    def __init__(self, ui_manager):
-        super().__init__(ui_manager)
+    def __init__(self, uiManager):
+        super().__init__(uiManager)
 
-    def update(self):
-        super().update()
+    def Update(self):
+        super().Update()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            self.ui_manager.set_screen('main_menu')
+            self.uiManager.setScreen('main_menu')
 
-    def render(self):
-        super().render()
-        text_surface = FONT.render("Main Game - Press ESC to return to menu", True, WHITE)
-        self.ui_manager.screen.blit(text_surface, (50, constants.HEIGHT // 2))
+    def Render(self):
+        super().Render()
+        surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, WHITE)
+        self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))
 
 # <summary>
 # creating classes for individual ui components, so far its just buttons
-# uses basic rectangle "collision" detection with the mouse, renders hover animation if hovered & clicking triggers customisable action
+# uses basic rectangle "collision" detection with the mouse, Renders hover animation if hovered & clicking triggers customisable action
 # </summary>        
 class Button:
     def __init__(self, text, x, y, action):
@@ -191,17 +196,17 @@ class Button:
         self.rect = pygame.Rect(x - 100, y - 25, 200, 50)
         self.hovered = False
 
-    def update(self):
-        mouse_pos = pygame.mouse.get_pos()
-        self.hovered = self.rect.collidepoint(mouse_pos)
+    def Update(self):
+        mousePos = pygame.mouse.get_pos()
+        self.hovered = self.rect.collidepoint(mousePos)
         if self.hovered and pygame.mouse.get_pressed()[0]:
             self.action()
 
-    def render(self, screen):
+    def Render(self, screen):
         color = LIGHT_GRAY if self.hovered else GRAY
         pygame.draw.rect(screen, color, self.rect)
-        text_surface = FONT.render(self.text, True, BLACK)
-        screen.blit(text_surface, (self.x - text_surface.get_width() // 2, self.y - text_surface.get_height() // 2))
+        surfaceText = FONT.render(self.text, True, BLACK)
+        screen.blit(surfaceText, (self.x - surfaceText.get_width() // 2, self.y - surfaceText.get_height() // 2))
 
 # <summary>
 # combines everything together
@@ -209,15 +214,15 @@ class Button:
 def main():
     screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
     pygame.display.set_caption('UI Engine Example')
-    ui_manager = UIManager(screen)
+    uiManager = UIManager(screen)
 
     # Create and add screens
-    ui_manager.add_screen('main_menu', MainMenu(ui_manager))
-    ui_manager.add_screen('tutorial', Tutorial(ui_manager))
-    ui_manager.add_screen('main_game', MainGame(ui_manager))
+    uiManager.AddScreen('main_menu', MainMenu(uiManager))
+    uiManager.AddScreen('tutorial', Tutorial(uiManager))
+    uiManager.AddScreen('main_game', MainGame(uiManager))
 
     # Set the initial screen
-    ui_manager.set_screen('main_menu')
+    uiManager.setScreen('main_menu')
 
     clock = pygame.time.Clock()
     running = True
@@ -227,8 +232,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        ui_manager.update()
-        ui_manager.render()
+        uiManager.Update()
+        uiManager.Render()
 
         pygame.display.flip()
         clock.tick(60)
