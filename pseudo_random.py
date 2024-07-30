@@ -2,6 +2,7 @@
 
 # script that creates a "random number" by generating 100 or so at the start of a game
 # from tests, getting random numbers can take almost 0.1 second per random.randint
+# however this takes about 20 seconds & doesn't correctly provide numbers, as python imports scripts weirdly
 
 import random
 

@@ -1,11 +1,11 @@
-# hello zigglezord
-# TODO:
-# 1. add the new fluid physics to particles with negative density --ABANDONED
-# 2. optimise (and add more necessary) ways that stats are transferred to newly created particles (such as fill level, age, etc) --DONE
-# 3. explosion physics & velocity simulation???
-# 4. fix gases
-# probably more but rn i'm lazy
-# you're gonna cringe reading this, cry abt it
+# hello sir
+# i've used a lot of c# coding conventions (unity) so sorry if it's confusing
+# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as update & probably more that I can't see yet
+# also i have used more modules than just pygame/sys but I believe they come installed with python
+# i've copied & pasted this to the top of every script just so you see this
+# pls give me bonus marks for not using AI :)
+
+# this is the script for the main game, manages more of the "backend" of things while particlefunctions.py manages the individual functions for particle movement itself.
 
 from particle_functions import *
 from project_settings import *

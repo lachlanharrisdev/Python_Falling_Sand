@@ -1,9 +1,20 @@
+# hello sir
+# i've used a lot of c# coding conventions (unity) so sorry if it's confusing
+# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as Update & probably more that I can't see yet
+# also i have used more modules than just pygame/sys but I believe they come installed with python
+# i've copied & pasted this to the top of every script just so you see this
+# pls give me bonus marks for not using AI :)
+
+# this script manages all the functions for managing individual particle functions & organising the grid. basically the front-end game logic
+
+# CELL - an individual cell, cannot be created or deleted but have values changed
+# PARTICLE - a movable, destroyable, reactable & decayable object that takes the position of a cell
+
 from project_settings import *
 import pygame, sys
 import random
 from main import *
 
-_rand = 0.5
 def CreateParticle(particle:Particle):
     # creates a NEW particle & places it on the main grid, used when manually placing particles & with fluids spreading
     grid[str(particle.pos)] = particle
@@ -33,8 +44,9 @@ def CreateParticle(particle:Particle):
 
         particle.colour.append(i)'''
 
-
+# <summary>
 # function to set a certain grid cell to a PRE-EXISTING particle, used when moving powders, swapping particles with density differences & reactions
+# </summary>    
 def SetCell(particle:Particle,pos:list):
     grid[str(pos)] = particle
     particle.pos = pos
@@ -59,7 +71,9 @@ def ClearCell(particle:Particle,pos:list):
                 grid[str(n)].active = True
     del grid[str(pos)]
 
-# function to move particles based on the "rules" of this CA
+# <summary>
+# absolutely chonkiest & most spaghetti function you'll see in here. holds all of the cellular automata rules & applies them based on neighbours, particle properties, etc.
+# </summary>    
 def MoveParticle(particle:Particle) -> dict:
     global moved
     moved = False
@@ -82,9 +96,6 @@ def MoveParticle(particle:Particle) -> dict:
         # go opposite direction if the random direction has a particle there
     if str(neighbours['side1']) in grid.keys():
         direction = 0 - direction
-    
-    
-
     
     
         # move to cell below if it is empty
@@ -234,37 +245,45 @@ def MoveParticle(particle:Particle) -> dict:
         particle.active = False
     return neighbours
 
+# <summary>
+# looks a lot more complicated than it is, ill try my best to explain 
+# manages the reactions of particles based on their neighbours & the set rules within project_settings.py
+# REACTANT - particle type used to start a reaction, PRODUCT - particle created after a reaction, REACTION - the reaction itself, involving 2 reactants to create a product
+# </summary>
 def ReactionCheck(p:Particle,neighbours:dict):
-    if len(particleTypes[p.type]['reactions']) > 0:
-        for r in particleTypes[p.type]['reactions']:
-            for i in reactions[r]['reactants']:
-                if p.type in i:
-                    for n in neighbours.values():
-                        if str(n) in grid.keys() and p.type == grid[str(n)].type:
-                            continue
-                        elif str(n) in grid.keys() and grid[str(n)].type in i:
-                            if randint(0,int(round(reactions[r]['reactionDifficulty']/clamp(p.fill,0.01,1)))) == 0:
-                                reactants = [p,grid[str(n)]]
-                                for x in reactants:
-                                    if reactions[r]['products'][i.index(x.type)] == -1:
-                                        ClearCell(x,x.pos)
-                                        continue
-                                    elif reactions[r]['products'][i.index(x.type)] == -2:
-                                        continue
+    if len(particleTypes[p.type]['reactions']) > 0: # if particle is capable of reacting
+        for r in particleTypes[p.type]['reactions']: # for all existing reactions this particle is a part of
+            for i in reactions[r]['reactants']: # for all of the required elements to create this reaction
+                if p.type in i: # if current particle is a reactant in this reaction
+                    for n in neighbours.values(): # for each adjacent (including diagonals) cell
+                        if str(n) in grid.keys() and p.type == grid[str(n)].type: # if this neighbour is occupied by a particle & is the same particle type as current particle (helps with optimisation)
+                            continue # next iteration through neighbours
+                        elif str(n) in grid.keys() and grid[str(n)].type in i: # if neighbour is occupied by a particle and is a reactant (BRAIN REFRESHER: r - current iteration of reactions, i - current iteration of reactants, n - current iteration of neighbours)
+                            if randint(0,int(round(reactions[r]['reactionDifficulty']/clamp(p.fill,0.01,1)))) == 0: # if a random chance of reaction (determined in project_settings.py) is fulfilled
+                                reactants = [p,grid[str(n)]] # store the particle class of both current particle & the successfully reacting neighbour
+                                for x in reactants: # for both the current particle & the reacting neighbour
+                                    if reactions[r]['products'][i.index(x.type)] == -1: # if set in project_settings.py to delete itself
+                                        ClearCell(x,x.pos) # delete particle
+                                        continue # next reactant
+                                    elif reactions[r]['products'][i.index(x.type)] == -2: # if set to do nothing
+                                        continue # next reactant
                                     else:
-                                        try:
+                                        try: # using a try method here as sometimes particles react while moving, and the movement in a grid space is effectively deleting a particle & creating a new one with the same properties
                                             del grid[str(x.pos)]
                                         except:
                                             pass
-                                        pos = x.pos
-                                        old_type = x.type
-                                        del x
-                                        CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
+                                        pos = x.pos # position of the new particle
+                                        old_type = x.type # store current reactant type
+                                        del x # delete reactant
+                                        CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)])) # create the product of the reaction in the reactant's position, with the type determined by the reactant's properties
                                         
                                             
-                else:
+                else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
                     continue
 
+# <summary>
+# brings all of these functions together. the only function in this script that manages more than one particle. called by main.py
+# </summary>                
 def UpdateWorld():
     particles = list(grid.values())
     neighbours = {}
@@ -278,7 +297,7 @@ def UpdateWorld():
                 except:
                     pass
                 del p
-            #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE))
+            #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE)) # used to draw particles BEFORE adding fluids, but deprecated as it does not Render fill levels
         if p != None and particleTypes[p.type]['decay'] != None:
             if p.age > particleTypes[p.type]['decay'][1] and randint(0,4) == 0:
                 try:
@@ -317,7 +336,7 @@ def UpdateWorld():
         #if p.active: 
         _fill = clamp(round(p.shownFill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
         
-# render fill level for gases upside down (as they should be) HOWEVER disabled due to fluid physics disable for gases
+# Render fill level for gases upside down (as they should be) HOWEVER disabled due to fluid physics disabled for gases
         '''
         if particleTypes[p.type]['density'] >= 0:
             pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
