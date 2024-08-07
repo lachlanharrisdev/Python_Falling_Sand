@@ -113,25 +113,25 @@ reactions = [
         'name':'hydrogen combust', # 0
         'reactants':[[3,4],[3,7],[3,9]], # list of combinations of elements that cause reaction
         'products':[4,-2], # what the particle turns into
-        'reactionDifficulty':1 # lower the number, the higher the chance of reaction occuring per frame
+        'reactionDifficulty':0 # lower the number, the higher the chance of reaction occuring per frame
     },
     {
         'name':'wood combust', # 1
         'reactants':[[6,4],[6,7],[6,9]],
         'products':[7,-2],
-        'reactionDifficulty':7
+        'reactionDifficulty':1
     },
     {
         'name':'oil combust', # 2
         'reactants':[[8,4],[8,7],[8,9]],
         'products':[9,-2],
-        'reactionDifficulty':4
+        'reactionDifficulty':3
     },
     {
         'name':'glass forging', # 3
         'reactants':[[0,4],[0,7],[0,9]],
         'products':[10,-2],
-        'reactionDifficulty':50
+        'reactionDifficulty':75
     },
     {
         'name':'water evaporation', # 4

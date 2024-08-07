@@ -11,19 +11,23 @@ from particle_functions import *
 from project_settings import *
 import pygame, sys
 from random import randint
-# import pygetwindow as gw
+import ui_engine as uiEngine
+# import pygetwindow as gw # attempted to create ui_engine as a separate window, but turned out to be much more complicated than I thought
 
-grid = {} # format: {cell pos x, cell pos y}
+grid = {} # grid[1,2] will return a particle with x position 1, y position 2 (2d array) or None if there is none there
 dragging = False # if mouse down & mouse movement is detected
 selected_particle = 0 # index of selected praticle in particleTypes
 cursor_size = 1 # size of cursor in pixels width
 cursor_rect = pygame.Rect # cursor image
 
+running = False # true when inside main game, false when in main menu or quit
+
 class Game:
     # initialise game window
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode(constants.RESOLUTION) # set resolution to predefined value
+        print("hello we are up to here")
+        self.screen = uiEngine.screen # pygame.display.set_mode(constants.RESOLUTION) # set resolution to predefined value
         self.clock = pygame.time.Clock()
         self.NewGame()
         
@@ -36,12 +40,14 @@ class Game:
                 CreateParticle(Particle([0,y],1))
                 CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))
     
+# manage framerate + debugging
     def Update(self):
         pygame.display.flip()
         self.clock.tick(constants.FPS)
         pygame.display.set_caption(f'FPS: {self.clock.get_fps()}   Particle: {particleTypes[selected_particle]['name'].upper()}')
         self.GameLoop()
         
+# manages main input events, calls updateWorld in particlefunctions.py & displays cursor
     def GameLoop(self):
         global cursor_rect
         pygame.display.update()
@@ -54,9 +60,10 @@ class Game:
         constants.DISPLAY.fill(constants.BACKGROUND)
         UpdateWorld()
         cursor_rect = pygame.Rect((pygame.mouse.get_pos()[0]//constants.CELLSIZE)*constants.CELLSIZE,(pygame.mouse.get_pos()[1]//constants.CELLSIZE)*constants.CELLSIZE,constants.CELLSIZE*cursor_size,constants.CELLSIZE*cursor_size)
-        pygame.draw.rect(constants.DISPLAY,(200,200,200),cursor_rect) # to add alpha this has to be a surface that is blitted to the screen
+        pygame.draw.rect(constants.DISPLAY,(200,200,200),cursor_rect) # to add transparency, this has to be a surface that is blitted to the screen (not bothered)
         constants.CLOCK.tick(constants.FPS)
         
+# rest of input management, debating whether i add keybinds system
     def HandleInput(self, event:pygame.event):
         global dragging
         global selected_particle
@@ -81,12 +88,27 @@ class Game:
         if dragging:
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
-                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle))
-        
+                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle))      
+# i wonder what this does 
     def run(self):
-        while True:
-            self.Update()
+        running = True
+        while running:
+            self.Update()    
+
+
+def RunMainGame():
+    if uiEngine.requestRunning:
+        if not running:    
+            game = Game() # python classes are weird but creating new game object (different to a gameObject for some stupid reason)
+            game.run()
+            running = True
+        
+running = False
 
 if __name__ == '__main__':
-    game = Game()
-    game.run()
+    uiEngine.main()  
+    if not running:    
+        game = Game() # python classes are weird but creating new game object (different to a gameObject for some stupid reason)
+        game.run()
+        running = True
+        uiEngine.running = False

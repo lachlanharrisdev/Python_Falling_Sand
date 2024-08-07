@@ -9,6 +9,9 @@
 
 import pygame, sys, math, random, subprocess
 import project_settings as settings
+# import main as mainGame # not imported as main since it's short for main menu in this context
+
+requestRunning = False # since this is imported into main, it uses a boolean to call a function in there to run the main game, as this script is unable to discretely call methods there
 
 pygame.init()
 
@@ -20,7 +23,7 @@ BLACK = (2, 0, 0)
 LIGHT_GRAY = (230, 230, 232)
 GRAY = (200,200,205)
 
-SCROLL_CLAMP = (-500,0)
+SCROLL_CLAMP = (-500,0) # scroll limits, in pixels, for the tutorial screen
 
 FONT = pygame.font.SysFont('Verdana', 28)
 TITLE_FONT = pygame.font.SysFont('Verdana', 69, bold=True) # nice
@@ -179,9 +182,14 @@ class MainGame(Screen):
             self.uiManager.setScreen('main_menu')
 
     def Render(self):
+        '''
         super().Render()
         surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, WHITE)
-        self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))
+        self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))'''
+        print("request running = true")
+        requestRunning = True
+        RunGame()
+        
 
 # <summary>
 # creating classes for individual ui components, so far its just buttons
@@ -210,7 +218,11 @@ class Button:
 
 # <summary>
 # combines everything together
-# </summary>        
+# </summary>   
+screen = None
+
+running = True
+
 def main():
     screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
     pygame.display.set_caption('UI Engine Example')
@@ -225,7 +237,8 @@ def main():
     uiManager.setScreen('main_menu')
 
     clock = pygame.time.Clock()
-    running = True
+
+    global running # python is genuinely a stupid language, please let us use c++
 
     while running:
         for event in pygame.event.get():
@@ -234,13 +247,22 @@ def main():
 
         uiManager.Update()
         uiManager.Render()
+        if requestRunning:
+            print("made it to pre running=false in uiengine")
+            running=False
+            print("made it to post running=false in uiengine")
 
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(constants.FPS)
 
-    pygame.quit()
-    sys.exit()
+    print("made it to sys.exit in uiengine")
+    
+def RunGame():
+    global running
+    running = False
 
 # ensure duplicate processes aren't run, or when importing to other scripts
 if __name__ == "__main__":
     main()
+
+

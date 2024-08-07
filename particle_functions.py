@@ -15,44 +15,26 @@ import pygame, sys
 import random
 from main import *
 
-def CreateParticle(particle:Particle):
+def CreateParticle(particle:Particle, _fill=1):
     # creates a NEW particle & places it on the main grid, used when manually placing particles & with fluids spreading
     grid[str(particle.pos)] = particle
     if particleTypes[particle.type]['moveType'] != 'static':
         particle.active = True
         
-    particle.fill = 1
-        
-    # sets a slightly random colour to the particle
+    particle.fill = _fill
+    
     particle.colour = [particleTypes[particle.type]['colour']]
     
-    # RANDOM COLOUR REMOVED DUE TO PERFORMANCE DEGRADE WHEN CREATING PARTICLES
-    '''
-    for i in particleTypes[particle.type]['colour']:
-        
-        sign = random.getrandbits(4) # using getrandbits because it is more optimised (main bottleneck of this function is getting a random number)
-        multi = sign
-        if sign < 8:
-            multi = -1
-        else:
-            multi = 1
-        value = i + (sign / 2 * multi)
-        if value > 255:
-            value = 255
-        if value < 0:
-            value = 0
-
-        particle.colour.append(i)'''
 
 # <summary>
 # function to set a certain grid cell to a PRE-EXISTING particle, used when moving powders, swapping particles with density differences & reactions
 # </summary>    
-def SetCell(particle:Particle,pos:list):
+def SetCell(particle:Particle,pos:list,_fill=0.5):
     grid[str(pos)] = particle
     particle.pos = pos
     
     if particleTypes[particle.type]['moveType'] == 'fluid': # when fluids are splitting into new particles to spread, this line ensures no extra fluid is created
-        particle.fill = 0.5 / constants.FLUID_STICKINESS
+        particle.fill = _fill
         
     neighbours = [[particle.pos[0],particle.pos[1]+1],[particle.pos[0]+1,particle.pos[1]+1],[particle.pos[0]-1,particle.pos[1]+1],[particle.pos[0]+1,particle.pos[1]],[particle.pos[0]-1,particle.pos[1]],[particle.pos[0],particle.pos[1]-1],[particle.pos[0]+1,particle.pos[1]-1],[particle.pos[0]-1,particle.pos[1]-1]]
     if particleTypes[particle.type]['moveType'] != 'static':
@@ -69,7 +51,10 @@ def ClearCell(particle:Particle,pos:list):
         if str(n) in grid.keys():
             if particleTypes[grid[str(n)].type]['moveType'] != 'static':
                 grid[str(n)].active = True
-    del grid[str(pos)]
+    try:
+        del grid[str(pos)]
+    except:
+        pass
 
 # <summary>
 # absolutely chonkiest & most spaghetti function you'll see in here. holds all of the cellular automata rules & applies them based on neighbours, particle properties, etc.
@@ -101,7 +86,7 @@ def MoveParticle(particle:Particle) -> dict:
         # move to cell below if it is empty
     if not str(neighbours['down']) in grid.keys() and particleTypes[particle.type]['density'] > 0:
         ClearCell(particle,particle.pos)
-        SetCell(particle,neighbours['down'])
+        SetCell(particle,neighbours['down'],particle.fill)
         moved=True
         
         # move to cell below if it has a particle with lower density
@@ -110,20 +95,20 @@ def MoveParticle(particle:Particle) -> dict:
         replacingParticle = grid[str(neighbours['down'])]
         ClearCell(grid[str(neighbours['down'])],neighbours['down'])
         SetCell(replacingParticle,particle.pos)
-        SetCell(particle,neighbours['down'])
+        SetCell(particle,neighbours['down'],particle.fill)
         moved=True
 
         # move to forward diagonal down cells if empty or lower density AND no particle forward (it would phase through otherwise)
     elif not str(neighbours['downdiagonal1']) in grid.keys() and particleTypes[particle.type]['density'] > 0 and not str(neighbours['side1']) in grid.keys():
         ClearCell(particle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal1'])
+        SetCell(particle,neighbours['downdiagonal1'],particle.fill)
         moved=True
     elif str(neighbours['downdiagonal1']) in grid.keys() and particleTypes[grid[str(neighbours['downdiagonal1'])].type]['density'] < particleTypes[particle.type]['density'] and not str(neighbours['side1']) in grid.keys():
         ClearCell(particle,particle.pos)
         replacingParticle = grid[str(neighbours['downdiagonal1'])]
         ClearCell(grid[str(neighbours['downdiagonal1'])],neighbours['downdiagonal1'])
         SetCell(replacingParticle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal1'])
+        SetCell(particle,neighbours['downdiagonal1'],particle.fill)
         moved=True
 
        # same as above but for behind
@@ -136,7 +121,7 @@ def MoveParticle(particle:Particle) -> dict:
         replacingParticle = grid[str(neighbours['downdiagonal2'])]
         ClearCell(grid[str(neighbours['downdiagonal2'])],neighbours['downdiagonal2'])
         SetCell(replacingParticle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal2'])
+        SetCell(particle,neighbours['downdiagonal2'],particle.fill)
         moved=True
 
     # same as above but for negative densities (gases)
@@ -169,11 +154,11 @@ def MoveParticle(particle:Particle) -> dict:
         # create & split water to particle in front if there is no particle there
         if not str(neighbours['side1']) in grid.keys():
             # SetCell(particle,neighbours['side1'])
-            CreateParticle(Particle(neighbours['side1'],particle.type))
+            CreateParticle(Particle(neighbours['side1'],particle.type), )
             grid[str(neighbours['side1'])].age = particle.age
             # grid[str(neighbours['side1'])].fill = particle.fill / 2
             # particle.fill = particle.fill / 2
-            diff = clamp(particle.fill - grid[str(neighbours['side1'])].fill,0,0.5) / constants.FLUID_STICKINESS
+            diff = clamp(particle.fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side1'])].fill = diff
             particle.fill -= diff
             moved=True
@@ -193,7 +178,7 @@ def MoveParticle(particle:Particle) -> dict:
             # grid[str(neighbours['side2'])].fill = particle.fill / 2
             # particle.fill = particle.fill / 2
 
-            diff = clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
+            diff = clamp(particle.fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side2'])].fill = diff
             particle.fill -= diff
             moved=True
@@ -272,10 +257,12 @@ def ReactionCheck(p:Particle,neighbours:dict):
                                             del grid[str(x.pos)]
                                         except:
                                             pass
-                                        pos = x.pos # position of the new particle
-                                        old_type = x.type # store current reactant type
-                                        del x # delete reactant
-                                        CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)])) # create the product of the reaction in the reactant's position, with the type determined by the reactant's properties
+                                        if particleTypes[p.type]['moveType'] == 'fluid':
+                                            if randint(0,int(100 - (p.fill * 100))) == 0: # multiply current particle fill & reacting neighbour fill to see if a reactant should be formed
+                                                pos = x.pos # position of the new particle
+                                                old_type = x.type # store current reactant type
+                                                del x # delete reactant
+                                                CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)])) # create the product of the reaction in the reactant's position, with the type determined by the reactant's properties
                                         
                                             
                 else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
@@ -299,22 +286,24 @@ def UpdateWorld():
                 del p
             #pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,p.pos[1]*constants.CELLSIZE,constants.CELLSIZE,constants.CELLSIZE)) # used to draw particles BEFORE adding fluids, but deprecated as it does not Render fill levels
         if p != None and particleTypes[p.type]['decay'] != None:
-            if p.age > particleTypes[p.type]['decay'][1] and randint(0,4) == 0:
+            if p.age > particleTypes[p.type]['decay'][1] and randint(0,4) == 0: # if small random chance is true and particle is older than decay age
                 try:
                     del grid[str(p.pos)]
                 except:
                     pass
                 if particleTypes[p.type]['decay'][0] != -1:
                     pos = p.pos
-                    old_type = p.type
+                    oldType = p.type
+                    oldFill = p.fill
                     del p
-                    CreateParticle(Particle(pos,particleTypes[old_type]['decay'][0]))
+                    if randint(0,int(100 - (oldFill * 100))) and oldFill > 0.1: # reduce odds of creating a decay particle depending on fill level
+                        CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
                     continue
                 else:
                     del p
                     continue
         p.age += 1
-        if particleTypes[p.type]['density'] < 0: # personally, gases look better as a solid colour but normal particles look better with varied colour
+        if particleTypes[p.type]['density'] < 0 or particleTypes[p.type]['moveType'] == 'fluid': # vary colour of gases & water each frame but not solid particles
             p.colour = []
             for i in particleTypes[p.type]['colour']:
                 sign = random.getrandbits(4) # using getrandbits because it is more optimised (main bottleneck of this function is getting a random number)
@@ -336,13 +325,6 @@ def UpdateWorld():
         #if p.active: 
         _fill = clamp(round(p.shownFill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
         
-# Render fill level for gases upside down (as they should be) HOWEVER disabled due to fluid physics disabled for gases
-        '''
-        if particleTypes[p.type]['density'] >= 0:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
-        else:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1+_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
-        '''
         if particleTypes[p.type]['moveType'] == 'fluid':
             pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
         else:
