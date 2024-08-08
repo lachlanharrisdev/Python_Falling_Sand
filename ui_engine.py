@@ -18,10 +18,10 @@ pygame.init()
 constants = settings.constants
 
 # common colours, just making it easy to change colour scheme
-WHITE = (250, 250, 255)
-BLACK = (2, 0, 0)
-LIGHT_GRAY = (230, 230, 232)
-GRAY = (200,200,205)
+BACKGROUND = (250, 250, 255)
+FOREGROUND = (2, 0, 0)
+TERTIARY = (230, 230, 232)
+TERTIARY_DARK = (200,200,205)
 
 SCROLL_CLAMP = (-500,0) # scroll limits, in pixels, for the tutorial screen
 
@@ -91,13 +91,13 @@ class Screen:
                 angle = triangle['angle'] + i * 2 * math.pi / 3
                 point = triangle['pos'] + pygame.math.Vector2(math.cos(angle), math.sin(angle)) * triangle['size']
                 points.append((point.x, point.y))
-            pygame.draw.polygon(self.uiManager.screen, LIGHT_GRAY, points, width=0)
+            pygame.draw.polygon(self.uiManager.screen, TERTIARY, points, width=0)
 
     def Update(self):
         self.Update_triangles()
 
     def Render(self):
-        self.uiManager.screen.fill(WHITE)
+        self.uiManager.screen.fill(BACKGROUND)
         self.draw_triangles()
         
 # <summary>
@@ -118,7 +118,7 @@ class MainMenu(Screen):
 
     def Render(self):
         super().Render()
-        title_surface = TITLE_FONT.render("Main Menu", True, BLACK)
+        title_surface = TITLE_FONT.render("Main Menu", True, FOREGROUND)
         self.uiManager.screen.blit(title_surface, (constants.WIDTH // 2 - title_surface.get_width() // 2, 50))
         for button in self.buttons:
             button.Render(self.uiManager.screen)
@@ -160,7 +160,7 @@ class Tutorial(Screen):
         except:
             # print("No images in loaded scene")
             pass 
-        surfaceText = FONT.render(self.text, True, BLACK)
+        surfaceText = FONT.render(self.text, True, FOREGROUND)
         self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
         self.backButton.Render(self.uiManager.screen)
         
@@ -184,7 +184,7 @@ class MainGame(Screen):
     def Render(self):
         '''
         super().Render()
-        surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, WHITE)
+        surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, BACKGROUND)
         self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))'''
         print("request running = true")
         requestRunning = True
@@ -211,9 +211,9 @@ class Button:
             self.action()
 
     def Render(self, screen):
-        color = LIGHT_GRAY if self.hovered else GRAY
+        color = TERTIARY if self.hovered else TERTIARY_DARK
         pygame.draw.rect(screen, color, self.rect)
-        surfaceText = FONT.render(self.text, True, BLACK)
+        surfaceText = FONT.render(self.text, True, FOREGROUND)
         screen.blit(surfaceText, (self.x - surfaceText.get_width() // 2, self.y - surfaceText.get_height() // 2))
 
 # <summary>

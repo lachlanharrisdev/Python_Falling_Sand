@@ -12,6 +12,8 @@ from project_settings import *
 import pygame, sys
 from random import randint
 import ui_engine as uiEngine
+from progression import *
+import asyncio
 # import pygetwindow as gw # attempted to create ui_engine as a separate window, but turned out to be much more complicated than I thought
 
 grid = {} # grid[1,2] will return a particle with x position 1, y position 2 (2d array) or None if there is none there
@@ -20,15 +22,25 @@ selected_particle = 0 # index of selected praticle in particleTypes
 cursor_size = 1 # size of cursor in pixels width
 cursor_rect = pygame.Rect # cursor image
 
+screen = uiEngine.screen # used as a global, since it is called with multiple functions
 running = False # true when inside main game, false when in main menu or quit
+
+# dialogue boxes
+font = pygame.font.SysFont('Verdana', 18)
 
 class Game:
     # initialise game window
     def __init__(self):
         pygame.init()
-        print("hello we are up to here")
         self.screen = uiEngine.screen # pygame.display.set_mode(constants.RESOLUTION) # set resolution to predefined value
         self.clock = pygame.time.Clock()
+        self.objectives_manager = ObjectivesManager(self.screen, font, constants.DIALOGUE_SOUND)
+        setup_objectives(self.objectives_manager)
+        self.objectives_manager.get_next_objective()
+        
+        global screen
+        screen = uiEngine.screen
+
         self.NewGame()
         
 # generate wall border around game
@@ -38,13 +50,17 @@ class Game:
             CreateParticle(Particle([x,0],1))
             for y in range(int(constants.HEIGHT/constants.CELLSIZE)):
                 CreateParticle(Particle([0,y],1))
-                CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))
+                CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))       
     
 # manage framerate + debugging
     def Update(self):
         pygame.display.flip()
         self.clock.tick(constants.FPS)
         pygame.display.set_caption(f'FPS: {self.clock.get_fps()}   Particle: {particleTypes[selected_particle]['name'].upper()}')
+        global screen
+        if screen == None:
+            screen=uiEngine.screen
+        print(str(self.screen))
         self.GameLoop()
         
 # manages main input events, calls updateWorld in particlefunctions.py & displays cursor
@@ -83,9 +99,12 @@ class Game:
                 print(particleTypes[selected_particle]['name'].upper())
             elif event.key == pygame.K_EQUALS and cursor_size < 3:
                 cursor_size += 1
+                self.objectives_manager.check_cursor_size(0)
             elif event.key == pygame.K_MINUS and cursor_size > 1:
                 cursor_size -= 1
+                self.objectives_manager.check_cursor_size(0)
         if dragging:
+            self.objectives_manager.check_place_particle(selected_particle)
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
                     CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle))      
@@ -111,4 +130,4 @@ if __name__ == '__main__':
         game = Game() # python classes are weird but creating new game object (different to a gameObject for some stupid reason)
         game.run()
         running = True
-        uiEngine.running = False
+        #uiEngine.running = False  

@@ -150,6 +150,8 @@ class constants:
     CLOCK = pygame.time.Clock()
     CELLSIZE = 20
     FLUID_STICKINESS = 1.2
+    # sound effects
+    DIALOGUE_SOUND = pygame.mixer.Sound("sounds/dialogue.mp3")
 
 class Particle:
     def __init__(self,pos,particle_type):
@@ -161,3 +163,19 @@ class Particle:
         self.fill = 1 # EXPERIMENTAL used for simulating much more advanced fluid physics
         self.prevFill = 1 # EXPERIMENTAL used in conjunction with "self.active" to help with optimisation
         self.shownFill = 1 # EXPERIMENTAL used to show fill, but will be full or empty depending on if there's other particles above, if its falling etc
+        
+
+# objectives
+from enum import Enum
+
+class ObjectiveType(Enum):
+    PLACE_PARTICLE = 1
+    REACTION = 2
+    CURSOR_SIZE = 3
+
+class Objective:
+    def __init__(self, objective_type, target_particle, description):
+        self.objective_type = objective_type
+        self.target_index = target_particle
+        self.description = description
+        

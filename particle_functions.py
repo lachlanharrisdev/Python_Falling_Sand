@@ -263,7 +263,13 @@ def ReactionCheck(p:Particle,neighbours:dict):
                                                 old_type = x.type # store current reactant type
                                                 del x # delete reactant
                                                 CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)])) # create the product of the reaction in the reactant's position, with the type determined by the reactant's properties
-                                        
+                                                # self.objectives_manager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                        else:
+                                            pos = x.pos # position of the new particle
+                                            old_type = x.type # store current reactant type
+                                            del x # delete reactant
+                                            CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
+                                            # self.objectives_manager.check_reaction(reactions[r]['products'][i.index(old_type)])
                                             
                 else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
                     continue
