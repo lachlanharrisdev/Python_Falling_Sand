@@ -247,6 +247,7 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                         elif str(n) in grid.keys() and grid[str(n)].type in i: # if neighbour is occupied by a particle and is a reactant (BRAIN REFRESHER: r - current iteration of reactions, i - current iteration of reactants, n - current iteration of neighbours)
                             if randint(0,int(round(reactions[r]['reactionDifficulty']/clamp(p.fill,0.01,1)))) == 0: # if a random chance of reaction (determined in project_settings.py) is fulfilled
                                 reactants = [p,grid[str(n)]] # store the particle class of both current particle & the successfully reacting neighbour
+                                _checkParticles = []
                                 for x in reactants: # for both the current particle & the reacting neighbour
                                     if reactions[r]['products'][i.index(x.type)] == -1: # if set in project_settings.py to delete itself
                                         ClearCell(x,x.pos) # delete particle
@@ -258,6 +259,7 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                                             del grid[str(x.pos)]
                                         except:
                                             pass
+                                        
                                         if particleTypes[p.type]['moveType'] == 'fluid':
                                             if randint(0,int(100 - (p.fill * 100))) == 0: # multiply current particle fill & reacting neighbour fill to see if a reactant should be formed
                                                 pos = x.pos # position of the new particle
@@ -265,15 +267,21 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                                                 del x # delete reactant
                                                 CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)])) # create the product of the reaction in the reactant's position, with the type determined by the reactant's properties
                                                 if _objectiveManager:
-                                                    _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                                    # _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)]) # if reaction particle was the current objective, it would freeze rendering the rest of the particles. instead added to a temporary array which is then checked for each particle as objective
+                                                    if not old_type in _checkParticles:
+                                                        _checkParticles.append(old_type)
                                         else:
                                             pos = x.pos # position of the new particle
                                             old_type = x.type # store current reactant type
                                             del x # delete reactant
                                             CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
                                             if _objectiveManager:
-                                                _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
-                                            
+                                                # _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                                if not old_type in _checkParticles:
+                                                        _checkParticles.append(old_type)
+                                for k in _checkParticles:
+                                    _objectiveManager.check_reaction(reactions[r]['products'][i.index(k)])
+                            
                 else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
                     continue
 
