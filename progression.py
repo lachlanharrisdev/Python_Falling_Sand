@@ -58,7 +58,7 @@ def display_dialogue(text, font=None, text_color=(255, 255, 255), box_color=(15,
 
             # Play the sound effect for each character
             _letter += 1
-            if sound_effect and _letter >= sound_interval:
+            if sound_effect and _letter >= sound_interval and not (char == " " or char == "."):
                 sound_effect.play()
                 _letter = 0
 
@@ -125,6 +125,8 @@ def setup_objectives(manager):
     manager.add_objective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a particle of sand. That's nothing though. Press - or = to change your cursor size")) # change cursor size
     manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, bulk creating particles. Now press C & place a water particle")) # place water
     manager.add_objective(Objective(ObjectiveType.REACTION, 11, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try making a puddle of water & put any fire particle near it")) # vapour reaction
-    manager.add_objective(Objective(ObjectiveType.REACTION, 5, "Pretty spicy, right? Now see if you can find anything flammable & ignite it (I love arson :D)")) # smoke reaction / decay
+    manager.add_objective(Objective(ObjectiveType.REACTION, 4, "Pretty spicy, right? Now see if you can find anything flammable & ignite it (I love arson :D)")) # smoke reaction / decay
+    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Even spicier! Let's see if you can figure out how to make glass...")) # glass reaction
+    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Good, you're actually competent. Now make... a leaf!")) # glass reaction
 
 

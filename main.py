@@ -18,9 +18,12 @@ import asyncio
 
 grid = {} # grid[1,2] will return a particle with x position 1, y position 2 (2d array) or None if there is none there
 dragging = False # if mouse down & mouse movement is detected
+destroying = False # if rmb & mouse movement detected
 selected_particle = 0 # index of selected praticle in particleTypes
 cursor_size = 1 # size of cursor in pixels width
 cursor_rect = pygame.Rect # cursor image
+
+objectiveReady=False # used to tell game loop whether it is ready to display first objective
 
 screen = uiEngine.screen # used as a global, since it is called with multiple functions
 running = False # true when inside main game, false when in main menu or quit
@@ -36,7 +39,6 @@ class Game:
         self.clock = pygame.time.Clock()
         self.objectives_manager = ObjectivesManager(self.screen, font, constants.DIALOGUE_SOUND)
         setup_objectives(self.objectives_manager)
-        self.objectives_manager.get_next_objective()
         
         global screen
         screen = uiEngine.screen
@@ -60,7 +62,6 @@ class Game:
         global screen
         if screen == None:
             screen=uiEngine.screen
-        print(str(self.screen))
         self.GameLoop()
         
 # manages main input events, calls updateWorld in particlefunctions.py & displays cursor
@@ -74,22 +75,32 @@ class Game:
             else:
                 self.HandleInput(event)
         constants.DISPLAY.fill(constants.BACKGROUND)
-        UpdateWorld()
+        UpdateWorld(self.objectives_manager)
         cursor_rect = pygame.Rect((pygame.mouse.get_pos()[0]//constants.CELLSIZE)*constants.CELLSIZE,(pygame.mouse.get_pos()[1]//constants.CELLSIZE)*constants.CELLSIZE,constants.CELLSIZE*cursor_size,constants.CELLSIZE*cursor_size)
         pygame.draw.rect(constants.DISPLAY,(200,200,200),cursor_rect) # to add transparency, this has to be a surface that is blitted to the screen (not bothered)
         constants.CLOCK.tick(constants.FPS)
+
+        global objectiveReady
+        if not objectiveReady:
+            self.objectives_manager.get_next_objective()
+            objectiveReady = True
         
 # rest of input management, debating whether i add keybinds system
     def HandleInput(self, event:pygame.event):
         global dragging
+        global destroying
         global selected_particle
         global cursor_size
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_LEFT:
                 dragging = True
+            elif event.button == pygame.BUTTON_RIGHT:
+                destroying = True
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == pygame.BUTTON_LEFT:
                 dragging = False
+            elif event.button == pygame.BUTTON_RIGHT:
+                destroying = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c:
                 if not selected_particle +1 >= len(particleTypes):
@@ -107,7 +118,14 @@ class Game:
             self.objectives_manager.check_place_particle(selected_particle)
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
-                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle))      
+                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle)) 
+        elif destroying:
+            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
+                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
+                    try: 
+                        ClearCell(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle),[x//constants.CELLSIZE,y//constants.CELLSIZE]) 
+                    except:
+                        pass
 # i wonder what this does 
     def run(self):
         running = True

@@ -32,7 +32,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'moveType':'fluid',
         'colour':(50,50,255),
         'density':1 ,
-        'reactions':[4],
+        'reactions':[4,6],
         'decay':None,
     },
     {
@@ -64,7 +64,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'moveType':'static',
         'colour':(168,100,50),
         'density':100, # all solids density is max
-        'reactions':[1],
+        'reactions':[1,6],
         'decay':None,
     },
     {
@@ -106,6 +106,14 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'density':-1,
         'reactions':[],
         'decay':[2,40],
+    },
+    {
+        'name':'plant', # 12
+        'moveType':'static',
+        'colour':(20,200,25),
+        'density':0.5,
+        'reactions':[5],
+        'decay':None,        
     }
 ]
 reactions = [
@@ -113,7 +121,7 @@ reactions = [
         'name':'hydrogen combust', # 0
         'reactants':[[3,4],[3,7],[3,9]], # list of combinations of elements that cause reaction
         'products':[4,-2], # what the particle turns into
-        'reactionDifficulty':0 # lower the number, the higher the chance of reaction occuring per frame
+        'reactionDifficulty':0 # lower the number, the higher the chance of reaction occuring per frame (randint (0, x) == 0)
     },
     {
         'name':'wood combust', # 1
@@ -138,7 +146,19 @@ reactions = [
         'reactants':[[2,4],[2,7],[2,9]],
         'products':[11,-2],
         'reactionDifficulty':100
-    }
+    },
+    {
+        'name':'plant burning', # 5
+        'reactants':[[12,4],[12,7],[12,9]],
+        'products':[9,-2],
+        'reactionDifficulty':4
+    },
+    {
+        'name':'plant growing', # 6
+        'reactants':[[2,6]],
+        'products':[12,-2],
+        'reactionDifficulty':20
+    },
 ]
 
 class constants:

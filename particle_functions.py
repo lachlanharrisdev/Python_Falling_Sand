@@ -17,13 +17,14 @@ from main import *
 
 def CreateParticle(particle:Particle, _fill=1):
     # creates a NEW particle & places it on the main grid, used when manually placing particles & with fluids spreading
-    grid[str(particle.pos)] = particle
-    if particleTypes[particle.type]['moveType'] != 'static':
-        particle.active = True
+    if not str(particle.pos) in grid.keys():
+        grid[str(particle.pos)] = particle
+        if particleTypes[particle.type]['moveType'] != 'static':
+            particle.active = True
         
-    particle.fill = _fill
+        particle.fill = _fill
     
-    particle.colour = [particleTypes[particle.type]['colour']]
+        particle.colour = [particleTypes[particle.type]['colour']]
     
 
 # <summary>
@@ -235,7 +236,7 @@ def MoveParticle(particle:Particle) -> dict:
 # manages the reactions of particles based on their neighbours & the set rules within project_settings.py
 # REACTANT - particle type used to start a reaction, PRODUCT - particle created after a reaction, REACTION - the reaction itself, involving 2 reactants to create a product
 # </summary>
-def ReactionCheck(p:Particle,neighbours:dict):
+def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
     if len(particleTypes[p.type]['reactions']) > 0: # if particle is capable of reacting
         for r in particleTypes[p.type]['reactions']: # for all existing reactions this particle is a part of
             for i in reactions[r]['reactants']: # for all of the required elements to create this reaction
@@ -263,13 +264,15 @@ def ReactionCheck(p:Particle,neighbours:dict):
                                                 old_type = x.type # store current reactant type
                                                 del x # delete reactant
                                                 CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)])) # create the product of the reaction in the reactant's position, with the type determined by the reactant's properties
-                                                # self.objectives_manager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                                if _objectiveManager:
+                                                    _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
                                         else:
                                             pos = x.pos # position of the new particle
                                             old_type = x.type # store current reactant type
                                             del x # delete reactant
                                             CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
-                                            # self.objectives_manager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                            if _objectiveManager:
+                                                _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
                                             
                 else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
                     continue
@@ -277,13 +280,13 @@ def ReactionCheck(p:Particle,neighbours:dict):
 # <summary>
 # brings all of these functions together. the only function in this script that manages more than one particle. called by main.py
 # </summary>                
-def UpdateWorld():
+def UpdateWorld(_objectiveManager=None):
     particles = list(grid.values())
     neighbours = {}
     for p in particles:
         if p.active:
             neighbours = MoveParticle(p)
-            ReactionCheck(p,neighbours)
+            ReactionCheck(p,neighbours,_objectiveManager)
             if p.pos[1] < -1:
                 try:
                     del grid[str(p.pos)]
@@ -302,8 +305,12 @@ def UpdateWorld():
                     oldType = p.type
                     oldFill = p.fill
                     del p
-                    if randint(0,int(100 - (oldFill * 100))) and oldFill > 0.1: # reduce odds of creating a decay particle depending on fill level
+                    if particleTypes[oldType]['moveType'] == 'fluid':
+                        if randint(0,int(100 - (oldFill * 100))) and oldFill > 0.1: # reduce odds of creating a decay particle depending on fill level
+                            CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
+                    else:
                         CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
+                    _objectiveManager.check_reaction(oldType)
                     continue
                 else:
                     del p
