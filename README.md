@@ -14,10 +14,10 @@ A small python project experimenting with cellular automata & eventually turning
 # Installation & Controls
 Simply download all the code & have all the python files within the same folder, then run main.py.
 
-Pressing left click will place the selected particle
-Pressing right click will delete the hovered particle(s)
-Using the minus & equals keys to change the cursor size
-Press the C key to change particle
+- Pressing left click will place the selected particle
+- Pressing right click will delete the hovered particle(s)
+- Using the minus & equals keys to change the cursor size
+- Press the C key to change particle
 
 # Known Bugs
 - The entire gases system lol (expect some wacky stuff when playing with them)
