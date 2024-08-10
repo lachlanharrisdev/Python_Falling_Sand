@@ -52,10 +52,13 @@ def ClearCell(particle:Particle,pos:list):
         if str(n) in grid.keys():
             if particleTypes[grid[str(n)].type]['moveType'] != 'static':
                 grid[str(n)].active = True
-    try:
+    if not (pos[0] == 0 or pos[0] == int(constants.WIDTH / constants.CELLSIZE)-1 or pos[1] == 0 or pos[1] == int(constants.HEIGHT / constants.CELLSIZE)-1):
         del grid[str(pos)]
+    '''try:
+        if (pos.x == 0 | pos.x == constants.WIDTH / constants.CELLSIZE) | (pos.y == 0 | pos.y == constants.WIDTH / constants.CELLSIZE):
+            del grid[str(pos)]
     except:
-        pass
+        pass'''
 
 # <summary>
 # absolutely chonkiest & most spaghetti function you'll see in here. holds all of the cellular automata rules & applies them based on neighbours, particle properties, etc.
@@ -63,6 +66,9 @@ def ClearCell(particle:Particle,pos:list):
 def MoveParticle(particle:Particle) -> dict:
     global moved
     moved = False
+    
+    if particleTypes[particle.type]['moveType'] == 'static':
+        return
 
     # direction determines the way the particle is "looking", either left or right.
     direction = randint(0,1)
@@ -213,8 +219,8 @@ def MoveParticle(particle:Particle) -> dict:
             ClearCell(particle, particle.pos)
         elif particle.fill < 1:
             particle.active = True
-        elif particle.fill >= 1:
-            particle.active = False
+        #elif particle.fill >= 1:
+        #    particle.active = False
             
     elif particleTypes[particle.type]['density'] < 0:
         if not str(neighbours['side1']) in grid.keys():

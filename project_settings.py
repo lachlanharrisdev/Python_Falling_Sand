@@ -111,7 +111,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'name':'plant', # 12
         'moveType':'static',
         'colour':(20,200,25),
-        'density':0.5,
+        'density':99, # not accurate but allows accurate behaviour
         'reactions':[5],
         'decay':None,        
     }
@@ -183,6 +183,7 @@ class Particle:
         self.fill = 1 # EXPERIMENTAL used for simulating much more advanced fluid physics
         self.prevFill = 1 # EXPERIMENTAL used in conjunction with "self.active" to help with optimisation
         self.shownFill = 1 # EXPERIMENTAL used to show fill, but will be full or empty depending on if there's other particles above, if its falling etc
+        self.indestructible = False # only used for wall particles, otherwise major memory leaks occur
         
 
 # objectives

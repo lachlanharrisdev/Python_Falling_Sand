@@ -47,12 +47,15 @@ class Game:
         
 # generate wall border around game
     def NewGame(self):
+        _wall = []
         for x in range(int(constants.WIDTH/constants.CELLSIZE)):
             CreateParticle(Particle([x,int(constants.HEIGHT/constants.CELLSIZE)-1],1))
             CreateParticle(Particle([x,0],1))
             for y in range(int(constants.HEIGHT/constants.CELLSIZE)):
                 CreateParticle(Particle([0,y],1))
-                CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))       
+                CreateParticle(Particle([int(constants.WIDTH/constants.CELLSIZE)-1,y],1))     
+        for p in list(grid.values()):
+            p.indestructible = True
     
 # manage framerate + debugging
     def Update(self):
@@ -121,7 +124,8 @@ class Game:
                     CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle)) 
         elif destroying:
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
-                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
+                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):  
+                    
                     try: 
                         ClearCell(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle),[x//constants.CELLSIZE,y//constants.CELLSIZE]) 
                     except:
