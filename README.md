@@ -1,5 +1,6 @@
 # Overview
 ![demonstration](https://github.com/user-attachments/assets/125cdac0-b5e0-4430-bbc4-a7261035d98f)
+
 A small python project experimenting with cellular automata & eventually turning it into a game.
 
 # Features
