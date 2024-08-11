@@ -1,6 +1,5 @@
 # hello sir
 # i've used a lot of c# coding conventions (unity) so sorry if it's confusing
-# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as Update & probably more that I can't see yet
 # also i have used more modules than just pygame/sys but I believe they come installed with python
 # i've copied & pasted this to the top of every script just so you see this
 # pls give me bonus marks for not using AI :)
@@ -9,18 +8,21 @@
 
 import pygame, sys, math, random, subprocess
 import project_settings as settings
+# import main as mainGame # not imported as main since it's short for main menu in this context
+
+requestRunning = False # since this is imported into main, it uses a boolean to call a function in there to run the main game, as this script is unable to discretely call methods there
 
 pygame.init()
 
 constants = settings.constants
 
 # common colours, just making it easy to change colour scheme
-WHITE = (250, 250, 255)
-BLACK = (2, 0, 0)
-LIGHT_GRAY = (230, 230, 232)
-GRAY = (200,200,205)
+BACKGROUND = (250, 250, 255)
+FOREGROUND = (2, 0, 0)
+TERTIARY = (230, 230, 232)
+TERTIARY_DARK = (200,200,205)
 
-SCROLL_CLAMP = (-500,0)
+SCROLL_CLAMP = (100,100) # scroll limits, in pixels, for the tutorial screen
 
 FONT = pygame.font.SysFont('Verdana', 28)
 TITLE_FONT = pygame.font.SysFont('Verdana', 69, bold=True) # nice
@@ -88,13 +90,13 @@ class Screen:
                 angle = triangle['angle'] + i * 2 * math.pi / 3
                 point = triangle['pos'] + pygame.math.Vector2(math.cos(angle), math.sin(angle)) * triangle['size']
                 points.append((point.x, point.y))
-            pygame.draw.polygon(self.uiManager.screen, LIGHT_GRAY, points, width=0)
+            pygame.draw.polygon(self.uiManager.screen, TERTIARY, points, width=0)
 
     def Update(self):
         self.Update_triangles()
 
     def Render(self):
-        self.uiManager.screen.fill(WHITE)
+        self.uiManager.screen.fill(BACKGROUND)
         self.draw_triangles()
         
 # <summary>
@@ -115,7 +117,7 @@ class MainMenu(Screen):
 
     def Render(self):
         super().Render()
-        title_surface = TITLE_FONT.render("Main Menu", True, BLACK)
+        title_surface = TITLE_FONT.render("Main Menu", True, FOREGROUND)
         self.uiManager.screen.blit(title_surface, (constants.WIDTH // 2 - title_surface.get_width() // 2, 50))
         for button in self.buttons:
             button.Render(self.uiManager.screen)
@@ -132,9 +134,9 @@ class MainMenu(Screen):
 class Tutorial(Screen):
     def __init__(self, uiManager):
         super().__init__(uiManager)
-        self.text = "blah blah blah tutorial stuff"
-        #self.images = [pygame.image.load('example.png')]  # no images yet
-        self.scrollOffset = 0 # how far the user has scrolled
+        self.text = None # "Welcome to Cosmic Cook! This is a 2d sandbox game where you simply have to complete objectives given by the narrator. This is a story game, so it is best to be played only once & not have your friends spoil surprises for you."
+        self.images = [pygame.image.load('instructions.png')]  # no images yet
+        self.scrollOffset = 20 # how far the user has scrolled
         self.backButton = Button("Back", 60, 30, self.go_back)
 
     def Update(self):
@@ -157,9 +159,55 @@ class Tutorial(Screen):
         except:
             # print("No images in loaded scene")
             pass 
-        surfaceText = FONT.render(self.text, True, BLACK)
-        self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
+        # surfaceText = FONT.render(self.text, True, FOREGROUND)
+        # self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
         self.backButton.Render(self.uiManager.screen)
+        
+
+        # render text, reuses dialogue code to automatically display in multiple lines
+        if not self.text == None:
+
+            screen_width = constants.WIDTH
+            screen_height = constants.HEIGHT
+
+            # Calculate the size of the dialogue box based on the text
+            lines = []
+            words = self.text.split(' ')
+            max_width = screen_width - 100  # Leave some padding
+            line = ""
+    
+            _letter = 0
+    
+            for word in words:
+                test_line = f"{line} {word}".strip()
+                if FONT.size(test_line)[0] <= max_width:
+                    line = test_line
+                else:
+                    lines.append(line)
+                    line = word
+            lines.append(line)
+
+            # Calculate box dimensions
+            box_padding = 10
+            max_line_width = max([FONT.size(line)[0] for line in lines])
+            box_width = max_line_width + 2 * box_padding
+            box_height = len(lines) * FONT.get_height() + 2 * box_padding
+    
+            # Position the box in the center-bottom of the screen
+            box_x = (screen_width - box_width) // 2
+            box_y = 0 + box_height - 50
+
+            # Create a surface for the dialogue box
+            box_surface = pygame.Surface((box_width, box_height))
+            box_surface.fill(BACKGROUND)
+
+            # Main loop to display each character one at a time
+            for i, line in enumerate(lines):
+                for j, char in enumerate(line):
+                    char_surface = FONT.render(char, True, FOREGROUND)
+                    box_surface.blit(char_surface, (box_padding + FONT.size(line[:j])[0], box_padding + i * FONT.get_height()))
+        
+            self.uiManager.screen.blit(box_surface, (box_x, box_y + yOffset))
         
     def go_back(self):
         self.uiManager.setScreen('main_menu')
@@ -179,9 +227,13 @@ class MainGame(Screen):
             self.uiManager.setScreen('main_menu')
 
     def Render(self):
+        '''
         super().Render()
-        surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, WHITE)
-        self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))
+        surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, BACKGROUND)
+        self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))'''
+        requestRunning = True
+        RunGame()
+        
 
 # <summary>
 # creating classes for individual ui components, so far its just buttons
@@ -203,14 +255,18 @@ class Button:
             self.action()
 
     def Render(self, screen):
-        color = LIGHT_GRAY if self.hovered else GRAY
+        color = TERTIARY if self.hovered else TERTIARY_DARK
         pygame.draw.rect(screen, color, self.rect)
-        surfaceText = FONT.render(self.text, True, BLACK)
+        surfaceText = FONT.render(self.text, True, FOREGROUND)
         screen.blit(surfaceText, (self.x - surfaceText.get_width() // 2, self.y - surfaceText.get_height() // 2))
 
 # <summary>
 # combines everything together
-# </summary>        
+# </summary>   
+screen = None
+
+running = True
+
 def main():
     screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
     pygame.display.set_caption('UI Engine Example')
@@ -225,22 +281,30 @@ def main():
     uiManager.setScreen('main_menu')
 
     clock = pygame.time.Clock()
-    running = True
+
+    global running # python is genuinely a stupid language, please let us use c++
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
+                sys.exit()
 
         uiManager.Update()
         uiManager.Render()
+        if requestRunning:
+            running=False
 
         pygame.display.flip()
-        clock.tick(60)
-
-    pygame.quit()
-    sys.exit()
+        clock.tick(constants.FPS)
+    
+def RunGame():
+    global running
+    running = False
 
 # ensure duplicate processes aren't run, or when importing to other scripts
 if __name__ == "__main__":
     main()
+
+
