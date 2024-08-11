@@ -12,7 +12,7 @@ import pygame, sys
 from random import randint
 import ui_engine as uiEngine
 from progression import *
-import asyncio
+import os
 # import pygetwindow as gw # attempted to create ui_engine as a separate window, but turned out to be much more complicated than I thought
 
 grid = {} # grid[1,2] will return a particle with x position 1, y position 2 (2d array) or None if there is none there
@@ -70,21 +70,43 @@ class Game:
             ScreenShake.screenShake = [Clamp(screenShake[0] + randint(-ScreenShake.SHAKE_MAX_CHANGE,ScreenShake.SHAKE_MAX_CHANGE), -ScreenShake.SHAKE_MAX_OFFSET, ScreenShake.SHAKE_MAX_OFFSET) * Clamp(ScreenShake.shakeTime / ScreenShake.SHAKE_BUILDUP,0,1), Clamp(screenShake[1] + randint(-ScreenShake.SHAKE_MAX_CHANGE,ScreenShake.SHAKE_MAX_CHANGE), -ScreenShake.SHAKE_MAX_OFFSET, ScreenShake.SHAKE_MAX_OFFSET) * Clamp(ScreenShake.shakeTime / ScreenShake.SHAKE_BUILDUP,0,1)]
             ScreenShake.shakeTime += 1/constants.FPS # since the rest of the game doesnt use delta time
             if ScreenShake.shakeTime > ScreenShake.SHAKE_QUIT_TIME:
-                constants.EXPLOSION_SOUND.play()
-                pygame.display.quit()
-                time.sleep(2)
-                screen = pygame.display.set_mode((1300,720))
-                screen.blit(pygame.image.load("endgame.png").convert(), (0,0))
-                pygame.display.flip()
-                pygame.mixer.music.play(-1,0,1500)
-                while True:
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            sys.exit()
+                self.EndGameScreen()
+                
         self.GameLoop()
         self.RenderHUD()
         self.Pause()
+        
+    def EndGameScreen(self):
+        constants.EXPLOSION_SOUND.play()
+        pygame.display.quit()
+        time.sleep(2)
+        screen = pygame.display.set_mode((1300,720))
+        screen.blit(pygame.image.load("endgame.png").convert(), (0,0))
+        pygame.display.set_caption("You win!")
+        pygame.display.flip()
+        pygame.mixer.music.play(-1,0,1500)
+        timer = 0 # used for screen fadeout
+        offset = [0,0]
+        while True:
+            self.clock.tick(constants.FPS)
+            timer += 1/constants.FPS
+            if timer > 5:
+                backgroundRect = pygame.Rect(0, 0, constants.WIDTH, constants.HEIGHT)
+                backgroundSurface = pygame.Surface((backgroundRect.width, backgroundRect.height), pygame.SRCALPHA)
+                backgroundSurface.fill((0,0,0)) # change background colour here
+                backgroundSurface.set_alpha(Clamp(timer-5,0,15)*15)
+                if timer > 10:
+                    pygame.quit()
+                    global running
+                    running = False
+                    os.startfile(__file__)
+                    sys.exit()
+                screen.blit(backgroundSurface, (offset[0],offset[1]))
+                pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
  
 # manages pausing functionality, both displaying the pause button & loading the pause menu
     def Pause(self):
@@ -165,7 +187,7 @@ class Game:
                 else:
                     selected_particle = 0
                 print(particleTypes[unlockedParticles[selected_particle]]['name'].upper()) # for debugging, print out the name of the just selected particle
-            elif event.key == pygame.K_EQUALS and cursor_size < 3: # clamp cursor size to a max of 3
+            elif event.key == pygame.K_EQUALS and cursor_size < 2: # clamp cursor size to a max of 2 (would be 3 but school laptop performance is incredibly bad)
                 cursor_size += 1
                 self.objectives_manager.CheckCursorSize(0)
             elif event.key == pygame.K_MINUS and cursor_size > 1: # clamp cursor size to a min of 1

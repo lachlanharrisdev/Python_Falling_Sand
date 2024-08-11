@@ -206,7 +206,7 @@ class constants:
     EXPLOSION_SOUND = pygame.mixer.Sound("sounds/explosion.wav")
     CLICK_SOUND = pygame.mixer.Sound("sounds/click.wav")
     MUSIC = "sounds/music.mp3"
-    SOUND_PLAY_CHANCE = 6 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)
+    SOUND_PLAY_CHANCE = 7 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)
     
     # fonts
     

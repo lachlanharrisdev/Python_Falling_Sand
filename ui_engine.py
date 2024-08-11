@@ -276,7 +276,7 @@ running = True
 
 def main():
     screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
-    pygame.display.set_caption('UI Engine Example')
+    pygame.display.set_caption('Cosmic Cook')
     uiManager = UIManager(screen)
     
     # play ambient music on repeat

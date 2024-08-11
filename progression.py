@@ -150,6 +150,7 @@ def SetupObjectives(manager):
     if GameParams.sandbox:
         manager.AddObjective(Objective(ObjectiveType.REACTION, 999, "This is the freeplay mode! Do whatever you want, no restrictions!", [1,2,4,5,6,7,8,9,10,11,12])) # unachievable reaction, unlocks everything from the beginning
     else:
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 13, "DEBUG:REACT_STAR", [3])) # star reaction, causes endgame
         manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Here we go again. First mission: click to place a sand particle", [])) # spawn sand, unlocks nothing
         manager.AddObjective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press = to increase your cursor size (and - to decrease it)", [])) # change cursor size, unlocks water
         manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, look at your big cursor. Now press C to change particle types, & place some water.", [2])) # place water, unlocks wood
