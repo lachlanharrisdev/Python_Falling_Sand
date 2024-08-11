@@ -22,7 +22,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
     {
         'name':'Wall', # 1
         'moveType':'static',
-        'colour':(100,100,100),
+        'colour':(22,20,20),
         'density':100, # infinity
         'reactions':[],
         'decay':None,
@@ -197,11 +197,21 @@ class constants:
     CLOCK = pygame.time.Clock()
     CELLSIZE = 20
     FLUID_STICKINESS = 1.2
+    
     # sound effects
+    
     DIALOGUE_SOUND = pygame.mixer.Sound("sounds/dialogue.mp3")
     OBJECTIVE_SOUND = pygame.mixer.Sound("sounds/objective.wav")
     RUMBLE_SOUND = pygame.mixer.Sound("sounds/rumble.wav")
+    CLICK_SOUND = pygame.mixer.Sound("sounds/click.wav")
+    MUSIC = pygame.mixer.Sound("sounds/music.mp3")
     SOUND_PLAY_CHANCE = 5 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)
+    
+    # fonts
+    
+    FONT = pygame.font.Font('fonts/pixelpro-2p.ttf', 28)
+    TITLE_FONT = pygame.font.Font('fonts/8-BIT WONDER.ttf', 90)
+    DIALOGUE_FONT = pygame.font.Font('fonts/pixelpro-2p.ttf', 36)
 
 class Particle:
     def __init__(self,pos,particle_type):

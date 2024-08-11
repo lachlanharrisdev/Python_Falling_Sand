@@ -106,12 +106,12 @@ class Game:
       
  # render ui components for the main game itself, for now just the current particle indicator
     def RenderHUD(self):
-        WHITE = (255,255,255)
+        colour = (255,250,250)
         padding = 4
-        offset = [20,25]
+        offset = [25,25]
         # current particle indicator
-        text = f"{particleTypes[unlockedParticles[selected_particle]]['name']} Selected"
-        text_surface = font.render(text, True, WHITE)
+        text = f"{particleTypes[unlockedParticles[selected_particle]]['name'].upper() } SELECTED"
+        text_surface = constants.FONT.render(text, True, colour)
     
         # Calculate dimensions
         text_width, text_height = text_surface.get_size()

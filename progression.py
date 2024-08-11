@@ -12,7 +12,7 @@ from project_settings import *
 
 def DisplayDialogue(text, isObjective=False, char_delay=0.035, text_color=(255, 255, 255), font=None, box_color=(15, 15, 15), sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
     if font is None:
-        font = pygame.font.Font(None, 36)  # grab a generic font
+        font = constants.DIALOGUE_FONT
     
 
     screenWidth = constants.WIDTH

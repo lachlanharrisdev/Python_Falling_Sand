@@ -7,6 +7,8 @@
 # this script is a "launcher" for the main game AND SHOULD BE RUN AS THE PRIMARY SCRIPT, however everything will work if you just run main.py, just won't have a menu to interact with
 
 import pygame, sys, math, random, subprocess
+
+from pygame.mixer import music
 import project_settings as settings
 # import main as mainGame # not imported as main since it's short for main menu in this context
 
@@ -17,15 +19,12 @@ pygame.init()
 constants = settings.constants
 
 # common colours, just making it easy to change colour scheme
-BACKGROUND = (250, 250, 255)
-FOREGROUND = (2, 0, 0)
-TERTIARY = (230, 230, 232)
-TERTIARY_DARK = (200,200,205)
+BACKGROUND = (12, 11, 10)
+FOREGROUND = (250, 250, 255)
+TERTIARY = (20, 20, 18)
+TERTIARY_DARK = (40,40,45)
 
 SCROLL_CLAMP = (100,100) # scroll limits, in pixels, for the tutorial screen
-
-FONT = pygame.font.SysFont('Verdana', 28)
-TITLE_FONT = pygame.font.SysFont('Verdana', 69, bold=True) # nice
 
 # using a classed based system just because of how modular it is, + keeps things nice & tidy
 
@@ -118,7 +117,7 @@ class MainMenu(Screen):
 
     def Render(self):
         super().Render()
-        title_surface = TITLE_FONT.render("COSMIC COOK", True, FOREGROUND)
+        title_surface = constants.TITLE_FONT.render("COSMIC COOK", True, FOREGROUND)
         self.uiManager.screen.blit(title_surface, (constants.WIDTH // 2 - title_surface.get_width() // 2, 50))
         for button in self.buttons:
             button.Render(self.uiManager.screen)
@@ -141,7 +140,7 @@ class Tutorial(Screen):
     def __init__(self, uiManager):
         super().__init__(uiManager)
         self.text = None # "Welcome to Cosmic Cook! This is a 2d sandbox game where you simply have to complete objectives given by the narrator. This is a story game, so it is best to be played only once & not have your friends spoil surprises for you."
-        self.images = [pygame.image.load('instructions.png')]  # no images yet
+        self.images = [pygame.image.load('instructions_transparent.png')]  # no images yet
         self.scrollOffset = 20 # how far the user has scrolled
         self.backButton = Button("Back", 60, 30, self.go_back)
 
@@ -160,12 +159,12 @@ class Tutorial(Screen):
         yOffset = self.scrollOffset
         try:
             for image in self.images:
-                self.uiManager.screen.blit(image, (50, yOffset))
+                self.uiManager.screen.blit(image, ((constants.WIDTH-image.get_width())/2, yOffset))
                 yOffset += image.get_height() + 10
         except:
             # print("No images in loaded scene")
             pass 
-        # surfaceText = FONT.render(self.text, True, FOREGROUND)
+        # surfaceText = constants.FONT.render(self.text, True, FOREGROUND)
         # self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
         self.backButton.Render(self.uiManager.screen)
         
@@ -186,7 +185,7 @@ class Tutorial(Screen):
     
             for word in words:
                 test_line = f"{line} {word}".strip()
-                if FONT.size(test_line)[0] <= max_width:
+                if constants.FONT.size(test_line)[0] <= max_width:
                     line = test_line
                 else:
                     lines.append(line)
@@ -195,9 +194,9 @@ class Tutorial(Screen):
 
             # Calculate box dimensions
             box_padding = 10
-            max_line_width = max([FONT.size(line)[0] for line in lines])
+            max_line_width = max([constants.FONT.size(line)[0] for line in lines])
             box_width = max_line_width + 2 * box_padding
-            box_height = len(lines) * FONT.get_height() + 2 * box_padding
+            box_height = len(lines) * constants.FONT.get_height() + 2 * box_padding
     
             # Position the box in the center-bottom of the screen
             box_x = (screen_width - box_width) // 2
@@ -210,8 +209,8 @@ class Tutorial(Screen):
             # Main loop to display each character one at a time
             for i, line in enumerate(lines):
                 for j, char in enumerate(line):
-                    char_surface = FONT.render(char, True, FOREGROUND)
-                    box_surface.blit(char_surface, (box_padding + FONT.size(line[:j])[0], box_padding + i * FONT.get_height()))
+                    char_surface = constants.FONT.render(char, True, FOREGROUND)
+                    box_surface.blit(char_surface, (box_padding + constants.FONT.size(line[:j])[0], box_padding + i * constants.FONT.get_height()))
         
             self.uiManager.screen.blit(box_surface, (box_x, box_y + yOffset))
         
@@ -259,11 +258,12 @@ class Button:
         self.hovered = self.rect.collidepoint(mousePos)
         if self.hovered and pygame.mouse.get_pressed()[0]:
             self.action()
+            constants.CLICK_SOUND.play()
 
     def Render(self, screen):
         color = TERTIARY if self.hovered else TERTIARY_DARK
         pygame.draw.rect(screen, color, self.rect)
-        surfaceText = FONT.render(self.text, True, FOREGROUND)
+        surfaceText = constants.FONT.render(self.text, True, FOREGROUND)
         screen.blit(surfaceText, (self.x - surfaceText.get_width() // 2, self.y - surfaceText.get_height() // 2))
 
 # <summary>
@@ -277,6 +277,12 @@ def main():
     screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
     pygame.display.set_caption('UI Engine Example')
     uiManager = UIManager(screen)
+    
+    # play ambient music on repeat
+    music.load("sounds/music.mp3")
+    music.play(-1)
+    
+    music.set_volume(0.7)
 
     # Create and add screens
     uiManager.AddScreen('main_menu', MainMenu(uiManager))
