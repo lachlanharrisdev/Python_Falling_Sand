@@ -1,6 +1,5 @@
 # hello sir
 # i've used a lot of c# coding conventions (unity) so sorry if it's confusing
-# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as update & probably more that I can't see yet
 # also i have used more modules than just pygame/sys but I believe they come installed with python
 # i've copied & pasted this to the top of every script just so you see this
 # pls give me bonus marks for not using AI :)

@@ -1,6 +1,5 @@
 # hello sir
 # i've used a lot of c# coding conventions (unity) so sorry if it's confusing
-# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as Update & probably more that I can't see yet
 # also i have used more modules than just pygame/sys but I believe they come installed with python
 # i've copied & pasted this to the top of every script just so you see this
 # pls give me bonus marks for not using AI :)
@@ -11,7 +10,7 @@ import pygame
 import time
 from project_settings import *
 
-def display_dialogue(text, font=None, text_color=(255, 255, 255), box_color=(15, 15, 15), char_delay=0.04, sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
+def display_dialogue(text, isObjective=False, char_delay=0.035, font=None, text_color=(255, 255, 255), box_color=(15, 15, 15), sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
     if font is None:
         font = pygame.font.Font(None, 36)  # Default font and size
     
@@ -50,6 +49,9 @@ def display_dialogue(text, font=None, text_color=(255, 255, 255), box_color=(15,
     box_surface = pygame.Surface((box_width, box_height))
     box_surface.fill(box_color)
 
+    if isObjective:
+        constants.OBJECTIVE_SOUND.play()
+
     # Main loop to display each character one at a time
     for i, line in enumerate(lines):
         for j, char in enumerate(line):
@@ -58,14 +60,16 @@ def display_dialogue(text, font=None, text_color=(255, 255, 255), box_color=(15,
 
             # Play the sound effect for each character
             _letter += 1
-            if sound_effect and _letter >= sound_interval and not (char == " " or char == "."):
+            if not isObjective and sound_effect and _letter >= sound_interval and not (char == " " or char == "." or char == ","):
                 sound_effect.play()
                 _letter = 0
-
             # Update the display
             pygame.display.get_surface().blit(box_surface, (box_x, box_y))
             pygame.display.update()
-            time.sleep(char_delay)
+            if not (char == "." or char == "," or char == ";" or char == "!"):
+                time.sleep(char_delay)
+            else:
+                time.sleep(char_delay*2)
     
     # Keep the full dialogue box on the screen for a short time after displaying all text
     pygame.display.update()
@@ -97,8 +101,8 @@ class ObjectivesManager:
             # Display the new objective to the user
             self.display_objective_dialogue(self.current_objective.description)
 
-    def display_objective_dialogue(self, text):
-        display_dialogue(text)
+    def display_objective_dialogue(self, text, _objective=False, _charDelay=0.035):
+        display_dialogue(text, _objective, _charDelay)
 
     def check_place_particle(self, particle_index):
         if self.current_objective and self.current_objective.objective_type == ObjectiveType.PLACE_PARTICLE:
@@ -116,17 +120,17 @@ class ObjectivesManager:
 
     def complete_objective(self):
         # Objective completed, display a dialogue and get the next objective
-        self.display_objective_dialogue("Objective completed!")
+        self.display_objective_dialogue("Objective completed!", True, 0.015)
         self.get_next_objective()
 
 # Example of adding objectives
 def setup_objectives(manager):
-    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Let's see what you can do; place a sand particle")) # spawn sand
-    manager.add_objective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a particle of sand. That's nothing though. Press - or = to change your cursor size")) # change cursor size
-    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, bulk creating particles. Now press C & place a water particle")) # place water
-    manager.add_objective(Objective(ObjectiveType.REACTION, 11, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try making a puddle of water & put any fire particle near it")) # vapour reaction
-    manager.add_objective(Objective(ObjectiveType.REACTION, 4, "Pretty spicy, right? Now see if you can find anything flammable & ignite it (I love arson :D)")) # smoke reaction / decay
-    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Even spicier! Let's see if you can figure out how to make glass...")) # glass reaction
-    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Good, you're actually competent. Now make... a leaf!")) # glass reaction
+    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Time for basic training. First, place a sand particle")) # spawn sand
+    manager.add_objective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press - or = to change your cursor size, we'll start making BIG things")) # change cursor size
+    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, bulk creating particles. Now press C to change particle types & place a water particle")) # place water
+    manager.add_objective(Objective(ObjectiveType.REACTION, 12, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try making placing some wood & watch what happens when you water it")) # leaf reaction
+    manager.add_objective(Objective(ObjectiveType.REACTION, 5, "We have life! Now see if you can set that tree on fire (I love arson :D)")) # smoke reaction / decay
+    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time to let you get thinking... Let's see if you can figure out how to make glass.")) # glass reaction
+    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Good, you're actually competent. Now make... a star!")) # glass reaction
 
 
