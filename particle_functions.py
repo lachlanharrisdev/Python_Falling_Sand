@@ -36,7 +36,7 @@ def CreateParticle(particle:Particle, _fill=1):
 # <summary>
 # function to set a certain grid cell to a PRE-EXISTING particle, used when moving powders, swapping particles with density differences & reactions
 # </summary>    
-def SetCell(particle:Particle,pos:list,_fill=0.5):
+def SetCell(particle:Particle,pos:list,age=0,_fill=0.5):
     grid[str(pos)] = particle
     particle.pos = pos
     
@@ -102,7 +102,7 @@ def MoveParticle(particle:Particle) -> dict:
         # move to cell below if it is empty
     if not str(neighbours['down']) in grid.keys() and particleTypes[particle.type]['density'] > 0:
         ClearCell(particle,particle.pos)
-        SetCell(particle,neighbours['down'],particle.fill)
+        SetCell(particle,neighbours['down'],particle.age,particle.fill)
         moved=True
         particle.state = "falling"
         
@@ -111,38 +111,38 @@ def MoveParticle(particle:Particle) -> dict:
         ClearCell(particle,particle.pos)
         replacingParticle = grid[str(neighbours['down'])]
         ClearCell(grid[str(neighbours['down'])],neighbours['down'])
-        SetCell(replacingParticle,particle.pos)
-        SetCell(particle,neighbours['down'],particle.fill)
+        SetCell(replacingParticle,particle.pos,replacingParticle.age,replacingParticle.fill)
+        SetCell(particle,neighbours['down'],particle.age,particle.fill)
         moved=True
         particle.state = "falling"
 
         # move to forward diagonal down cells if empty or lower density AND no particle forward (it would phase through otherwise)
     elif not str(neighbours['downdiagonal1']) in grid.keys() and particleTypes[particle.type]['density'] > 0 and not str(neighbours['side1']) in grid.keys():
         ClearCell(particle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal1'],particle.fill)
+        SetCell(particle,neighbours['downdiagonal1'],particle.age,particle.fill)
         moved=True
         particle.state = "rolling"
     elif str(neighbours['downdiagonal1']) in grid.keys() and particleTypes[grid[str(neighbours['downdiagonal1'])].type]['density'] < particleTypes[particle.type]['density'] and not str(neighbours['side1']) in grid.keys():
         ClearCell(particle,particle.pos)
         replacingParticle = grid[str(neighbours['downdiagonal1'])]
         ClearCell(grid[str(neighbours['downdiagonal1'])],neighbours['downdiagonal1'])
-        SetCell(replacingParticle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal1'],particle.fill)
+        SetCell(replacingParticle,particle.pos,replacingParticle.age,replacingParticle.fill)
+        SetCell(particle,neighbours['downdiagonal1'],particle.age,particle.fill)
         moved=True
         particle.state = "rolling"
 
        # same as above but for behind
     elif not str(neighbours['downdiagonal2']) in grid.keys() and particleTypes[particle.type]['density'] > 0 and not str(neighbours['side1']) in grid.keys():
         ClearCell(particle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal2'])
+        SetCell(particle,neighbours['downdiagonal2'],particle.age)
         moved=True
         particle.state = "rolling"
     elif str(neighbours['downdiagonal2']) in grid.keys() and particleTypes[grid[str(neighbours['downdiagonal2'])].type]['density'] < particleTypes[particle.type]['density'] and not str(neighbours['side1']) in grid.keys():
         ClearCell(particle,particle.pos)
         replacingParticle = grid[str(neighbours['downdiagonal2'])]
         ClearCell(grid[str(neighbours['downdiagonal2'])],neighbours['downdiagonal2'])
-        SetCell(replacingParticle,particle.pos)
-        SetCell(particle,neighbours['downdiagonal2'],particle.fill)
+        SetCell(replacingParticle,particle.pos,replacingParticle.age,replacingParticle.fill)
+        SetCell(particle,neighbours['downdiagonal2'],particle.age,particle.fill)
         moved=True
         particle.state = "rolling"
 
@@ -167,11 +167,11 @@ def MoveParticle(particle:Particle) -> dict:
     
         
 
-    # physics for FLUID particles (implementing the fill level & pressure simulation) (TEMPORARILY DISABLED FOR GASES)
+    # physics for FLUID particles (implementing the fill level & pressure simulation)
     elif particleTypes[particle.type]['moveType'] == 'fluid' and particleTypes[particle.type]['density'] > 0:
         # fill particle below current if it is the same particle type & it is not fill > 1
         if particleTypes[particle.type]['density'] > 0 and grid[str(neighbours['down'])].type == particle.type and grid[str(neighbours['down'])].fill < 1:
-            diff = clamp(1 - grid[str(neighbours['down'])].fill,0,particle.fill)
+            diff = Clamp(1 - grid[str(neighbours['down'])].fill,0,particle.fill)
             grid[str(neighbours['down'])].fill += diff
             particle.fill -= diff
             moved=True
@@ -184,7 +184,7 @@ def MoveParticle(particle:Particle) -> dict:
             grid[str(neighbours['side1'])].age = particle.age
             # grid[str(neighbours['side1'])].fill = particle.fill / 2
             # particle.fill = particle.fill / 2
-            diff = clamp(particle.fill,0,0.5) / constants.FLUID_STICKINESS
+            diff = Clamp(particle.fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side1'])].fill = diff
             particle.fill -= diff
             moved=True
@@ -192,7 +192,7 @@ def MoveParticle(particle:Particle) -> dict:
             
         # split water to particle in front if there is particle of same type there & fill is less than current particle
         elif grid[str(neighbours['side1'])].type == particle.type and grid[str(neighbours['side1'])].fill < particle.fill: # and not moved:
-            diff = clamp(particle.fill - grid[str(neighbours['side1'])].fill,0,0.5) / constants.FLUID_STICKINESS
+            diff = Clamp(particle.fill - grid[str(neighbours['side1'])].fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side1'])].fill += diff
             particle.fill -= diff
             moved=True
@@ -206,7 +206,7 @@ def MoveParticle(particle:Particle) -> dict:
             # grid[str(neighbours['side2'])].fill = particle.fill / 2
             # particle.fill = particle.fill / 2
 
-            diff = clamp(particle.fill,0,0.5) / constants.FLUID_STICKINESS
+            diff = Clamp(particle.fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side2'])].fill = diff
             particle.fill -= diff
             moved=True
@@ -214,7 +214,7 @@ def MoveParticle(particle:Particle) -> dict:
          
         # same function as above but behind
         elif grid[str(neighbours['side2'])].type == particle.type and grid[str(neighbours['side1'])].fill < particle.fill: # and not moved:
-            diff = clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
+            diff = Clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
             grid[str(neighbours['side2'])].fill += diff
             particle.fill -= diff
             moved=True
@@ -228,7 +228,7 @@ def MoveParticle(particle:Particle) -> dict:
                 moved=True
                 particle.state = "filling"
             elif grid[str(neighbours['up'])].type == particle.type:
-                diff = clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
+                diff = Clamp(particle.fill - grid[str(neighbours['side2'])].fill,0,0.5) / constants.FLUID_STICKINESS
                 grid[str(neighbours['up'])].fill += diff
                 particle.fill -= diff
                 moved = True
@@ -250,12 +250,12 @@ def MoveParticle(particle:Particle) -> dict:
     elif particleTypes[particle.type]['density'] < 0:
         if not str(neighbours['side1']) in grid.keys():
             ClearCell(particle,particle.pos)
-            SetCell(particle,neighbours['side1'])
+            SetCell(particle,neighbours['side1'],particle.age)
             moved=True
             
         if not str(neighbours['side2']) in grid.keys():
             ClearCell(particle,particle.pos)
-            SetCell(particle,neighbours['side2'])
+            SetCell(particle,neighbours['side2'],particle.age)
             moved=True
 
     if not moved:
@@ -283,7 +283,7 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                         if str(n) in grid.keys() and p.type == grid[str(n)].type: # if this neighbour is occupied by a particle & is the same particle type as current particle (helps with optimisation)
                             continue # next iteration through neighbours
                         elif str(n) in grid.keys() and grid[str(n)].type in i: # if neighbour is occupied by a particle and is a reactant (BRAIN REFRESHER: r - current iteration of reactions, i - current iteration of reactants, n - current iteration of neighbours)
-                            if randint(0,int(round(reactions[r]['reactionDifficulty']/clamp(p.fill,0.01,1)))) == 0: # if a random chance of reaction (determined in project_settings.py) is fulfilled
+                            if randint(0,int(round(reactions[r]['reactionDifficulty']/Clamp(p.fill,0.01,1)))) == 0: # if a random chance of reaction (determined in project_settings.py) is fulfilled
                                 reactants = [p,grid[str(n)]] # store the particle class of both current particle & the successfully reacting neighbour
                                 _checkParticles = []
                                 for x in reactants: # for both the current particle & the reacting neighbour
@@ -309,7 +309,7 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                                                 except:
                                                     pass
                                                 if _objectiveManager:
-                                                    #_objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)]) # if reaction particle was the current objective, it would freeze rendering the rest of the particles. instead added to a temporary array which is then checked for each particle as objective
+                                                    #_objectiveManager.CheckReaction(reactions[r]['products'][i.index(old_type)]) # if reaction particle was the current objective, it would freeze rendering the rest of the particles. instead added to a temporary array which is then checked for each particle as objective
                                                     if not reactions[r]['products'][i.index(old_type)] in _checkParticles:
                                                         _checkParticles.append(reactions[r]['products'][i.index(old_type)])
                                         else:
@@ -318,11 +318,11 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                                             del x # delete reactant
                                             CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
                                             if _objectiveManager:
-                                                #_objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                                #_objectiveManager.CheckReaction(reactions[r]['products'][i.index(old_type)])
                                                 if not reactions[r]['products'][i.index(old_type)] in _checkParticles:
                                                         _checkParticles.append(reactions[r]['products'][i.index(old_type)])
                                 #for k in _checkParticles:
-                                #    _objectiveManager.check_reaction(reactions[r]['products'][i.index(k)])
+                                #    _objectiveManager.CheckReaction(reactions[r]['products'][i.index(k)])
                                 return _checkParticles                        
                             
                 else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
@@ -366,7 +366,7 @@ def UpdateWorld(_objectiveManager=None):
                             CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
                     else:
                         CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
-                    _objectiveManager.check_reaction(particleTypes[oldType]['decay'][0])
+                    _objectiveManager.CheckReaction(particleTypes[oldType]['decay'][0])
                     continue
                 else:
                     del p
@@ -392,16 +392,16 @@ def UpdateWorld(_objectiveManager=None):
             p.active = True
             p.prevFill = p.fill
         #if p.active: 
-        _fill = clamp(ceil(p.fill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
+        _fill = Clamp(ceil(p.fill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
         
         if particleTypes[p.type]['moveType'] == 'fluid' and particleTypes[p.type]['density'] > 0:
             pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE+ScreenShake.screenShake[0],(p.pos[1]+(1-_fill))*(constants.CELLSIZE)+ScreenShake.screenShake[1],constants.CELLSIZE,constants.CELLSIZE * _fill))
         else:
             pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE+ScreenShake.screenShake[0],(p.pos[1])*(constants.CELLSIZE)+ScreenShake.screenShake[1],constants.CELLSIZE,constants.CELLSIZE))
     for k in objectiveCheck:
-        _objectiveManager.check_reaction(k) # check for objective complete only after all particles have been rendered
+        _objectiveManager.CheckReaction(k) # check for objective complete only after all particles have been rendered
 
-# basic clamp function which I use surprisingly a lot, clamps x to between y (the low) & z (the high)
-def clamp(x,y,z) -> float:
+# basic Clamp function which I use surprisingly a lot, Clamps x to between y (the low) & z (the high)
+def Clamp(x,y,z) -> float:
     i = max(y, min(x, z))
     return i

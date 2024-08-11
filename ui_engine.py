@@ -106,8 +106,9 @@ class MainMenu(Screen):
     def __init__(self, uiManager):
         super().__init__(uiManager)
         self.buttons = [
-            Button("Start Game", constants.WIDTH // 2, constants.HEIGHT // 2, self.start_game),
-            Button("Tutorial", constants.WIDTH // 2, constants.HEIGHT // 2 + 60, self.show_tutorial)
+            Button("Story", constants.WIDTH // 2, constants.HEIGHT // 2, self.start_game),
+            Button("Sandbox", constants.WIDTH // 2, constants.HEIGHT // 2 + 60, self.start_sandbox),
+            Button("Controls", constants.WIDTH // 2, constants.HEIGHT // 2 + 120, self.show_tutorial)
         ]
 
     def Update(self):
@@ -117,16 +118,21 @@ class MainMenu(Screen):
 
     def Render(self):
         super().Render()
-        title_surface = TITLE_FONT.render("Main Menu", True, FOREGROUND)
+        title_surface = TITLE_FONT.render("COSMIC COOK", True, FOREGROUND)
         self.uiManager.screen.blit(title_surface, (constants.WIDTH // 2 - title_surface.get_width() // 2, 50))
         for button in self.buttons:
             button.Render(self.uiManager.screen)
 
     def start_game(self):
+        settings.GameParams.sandbox = False
         self.uiManager.setScreen('main_game')
 
     def show_tutorial(self):
         self.uiManager.setScreen('tutorial')
+    
+    def start_sandbox(self):
+        settings.GameParams.sandbox = True
+        self.uiManager.setScreen('main_game')
 
 # <summary>
 # tutorial page derived from screen class, like main menu

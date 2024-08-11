@@ -11,16 +11,16 @@ pygame.init()
 
 particleTypes = [ # air has density of 0, negative values float to top, positive fall
     {
-        'name':'sand', # 0
+        'name':'Sand', # 0
         'moveType':'powder', # how the particle moves
         'colour':(235,225,52), # average particle colour
         'density':1.6, # how dense the particle is
         'reactions':[3], # list of reactions it is a part of (just for optimisation)
         'decay':None, # what it will decay into after amount of frames [decay_into,decay_min_age]
-        'sound':pygame.mixer.Sound("sounds/sand.wav"),
+        'sound':pygame.mixer.Sound("sounds/sand.wav"), # sound to play at appropriate times (sometimes when moving, always when the product of reaction, sometimes when being placed)
     },
     {
-        'name':'wall', # 1
+        'name':'Wall', # 1
         'moveType':'static',
         'colour':(100,100,100),
         'density':100, # infinity
@@ -29,7 +29,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':None,
     },
     {
-        'name':'water', # 2
+        'name':'Water', # 2
         'moveType':'fluid',
         'colour':(50,50,255),
         'density':1 ,
@@ -38,7 +38,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/water.wav"),
     },
     {
-        'name':'hydrogen', # 3
+        'name':'Hydrogen', # 3
         'moveType':'fluid',
         'colour':(200,50,50),
         'density':-1,
@@ -47,7 +47,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/vapour.wav"),
     },
     {
-        'name':'fire_gas', # 4
+        'name':'Fire Gas', # 4
         'moveType':'fluid',
         'colour':(235,110,52),
         'density':-1,
@@ -56,7 +56,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/fire.wav"),
     },
     {
-        'name':'smoke', # 5
+        'name':'Smoke', # 5
         'moveType':'fluid',
         'colour':(75,75,75),
         'density':-1,
@@ -65,7 +65,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/fire.wav"),
     },
     {
-        'name':'wood', # 6
+        'name':'Wood', # 6
         'moveType':'static',
         'colour':(168,100,50),
         'density':100, # all solids density is max
@@ -74,7 +74,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/wood.wav"),
     },
     {
-        'name':'fire_solid', # 7
+        'name':'Fire Solid', # 7
         'moveType':'static',
         'colour':(235,110,52),
         'density':100,
@@ -83,7 +83,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/fire.wav"),
     },
     {
-        'name':'oil', # 8
+        'name':'Oil', # 8
         'moveType':'fluid',
         'colour':(168,133,50),
         'density':0.7,
@@ -92,7 +92,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/water.wav"),
     },
     {
-        'name':'fire_liquid', # 9
+        'name':'Fire Liquid', # 9
         'moveType':'fluid',
         'colour':(235,110,52),
         'density':0.9,
@@ -101,7 +101,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/fire.wav"),
     },
     {
-        'name':'glass', # 10
+        'name':'Glass', # 10
         'moveType':'static',
         'colour':(240,240,255),
         'density':2.5,
@@ -110,7 +110,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/glass.wav")
     },
     {
-        'name':'vapour', # 11
+        'name':'Vapour', # 11
         'moveType':'fluid',
         'colour':(220,220,255),
         'density':-1,
@@ -119,7 +119,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/vapour.wav"),
     },
     {
-        'name':'plant', # 12
+        'name':'Plant', # 12
         'moveType':'static',
         'colour':(20,200,25),
         'density':99, # not accurate but allows accurate behaviour
@@ -128,7 +128,7 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'sound':pygame.mixer.Sound("sounds/sand.wav"),
     },
     {
-        'name':'star', # 13
+        'name':'Star', # 13
         'moveType':'static',
         'colour':(255,255,245),
         'density':9999,
@@ -242,3 +242,6 @@ class ScreenShake: # used to share "doScreenShake" across scripts, since python 
     SHAKE_MAX_CHANGE = 15
     SHAKE_BUILDUP = 5
     SHAKE_QUIT_TIME = 10 # seconds to wait until closing window
+    
+class GameParams: # used to share starting variables for the game across scripts (for now just if the user is playing sandbox or not)
+    sandbox = False
