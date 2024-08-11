@@ -10,7 +10,7 @@ import pygame
 import time
 from project_settings import *
 
-def display_dialogue(text, isObjective=False, char_delay=0.035, font=None, text_color=(255, 255, 255), box_color=(15, 15, 15), sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
+def display_dialogue(text, isObjective=False, char_delay=0.035, text_color=(255, 255, 255), font=None, box_color=(15, 15, 15), sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
     if font is None:
         font = pygame.font.Font(None, 36)  # Default font and size
     
@@ -82,7 +82,10 @@ def display_dialogue(text, isObjective=False, char_delay=0.035, font=None, text_
 # ---------------------------------------------------------------
 # objectives
 
-import asyncio
+unlockedParticles = [0] # array of the indexes of unlocked particles (is capable of going [0,3,2], meaning it would display sand, then hydrogen, then water in that order)    
+# screenShake = [0,0] # offset for particle rendering in x, y pixels
+
+from random import randint
 
 class ObjectivesManager:
     def __init__(self, screen, font, sound_effect):
@@ -100,6 +103,8 @@ class ObjectivesManager:
             self.current_objective = self.objectives.pop(0)
             # Display the new objective to the user
             self.display_objective_dialogue(self.current_objective.description)
+            for i in self.current_objective.unlocks:
+                unlockedParticles.append(i)
 
     def display_objective_dialogue(self, text, _objective=False, _charDelay=0.035):
         display_dialogue(text, _objective, _charDelay)
@@ -116,8 +121,15 @@ class ObjectivesManager:
     def check_reaction(self, reactant_index):
         if self.current_objective and self.current_objective.objective_type == ObjectiveType.REACTION:
             if reactant_index == self.current_objective.target_index:
-                self.complete_objective()
-
+                if not reactant_index == 13:
+                    self.complete_objective()
+                elif not ScreenShake.doScreenShake:
+                    self.endGame()
+    def endGame(self):
+        constants.RUMBLE_SOUND.play()
+        display_dialogue("Wait... I should NOT have told you to do that... RUN!!!", False, 0.035, (200,20,20))
+        ScreenShake.doScreenShake = True
+        
     def complete_objective(self):
         # Objective completed, display a dialogue and get the next objective
         self.display_objective_dialogue("Objective completed!", True, 0.015)
@@ -125,12 +137,15 @@ class ObjectivesManager:
 
 # Example of adding objectives
 def setup_objectives(manager):
-    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Time for basic training. First, place a sand particle")) # spawn sand
-    manager.add_objective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press - or = to change your cursor size, we'll start making BIG things")) # change cursor size
-    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, bulk creating particles. Now press C to change particle types & place a water particle")) # place water
-    manager.add_objective(Objective(ObjectiveType.REACTION, 12, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try making placing some wood & watch what happens when you water it")) # leaf reaction
-    manager.add_objective(Objective(ObjectiveType.REACTION, 5, "We have life! Now see if you can set that tree on fire (I love arson :D)")) # smoke reaction / decay
-    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time to let you get thinking... Let's see if you can figure out how to make glass.")) # glass reaction
-    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Good, you're actually competent. Now make... a star!")) # glass reaction
-
+    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Time for basic training. First, place a sand particle", [])) # spawn sand, unlocks nothing
+    manager.add_objective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press - or = to change your cursor size, we'll start making BIG things!", [])) # change cursor size, unlocks water
+    manager.add_objective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, look at your big cursor. Now press C to change particle types, & place some water.", [2])) # place water, unlocks wood
+    manager.add_objective(Objective(ObjectiveType.REACTION, 12, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try placing some wood & watch what happens when you water it.", [6])) # leaf reaction, unlocks fire liquid
+    manager.add_objective(Objective(ObjectiveType.REACTION, 5, "We have life! Now see if you can set that tree on fire (I love arson :D)", [9])) # smoke reaction / decay, unlocks nothing
+    manager.add_objective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time to let you get thinking... Let's see if you can figure out how to make glass.", [])) # glass reaction, unlocks hydrogen
+    manager.add_objective(Objective(ObjectiveType.REACTION, 13, "Good, you're actually competent. Now make... a star!", [3])) # star reaction, causes endgame
+    
+def clamp(x,y,z) -> float:
+    i = max(y, min(x, z))
+    return i
 

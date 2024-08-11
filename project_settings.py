@@ -42,8 +42,8 @@ particleTypes = [ # air has density of 0, negative values float to top, positive
         'moveType':'fluid',
         'colour':(200,50,50),
         'density':-1,
-        'reactions':[0],
-        'decay':None,
+        'reactions':[0,7],
+        'decay':[13,150],
         'sound':pygame.mixer.Sound("sounds/vapour.wav"),
     },
     {
@@ -180,6 +180,12 @@ reactions = [
         'products':[12,-2],
         'reactionDifficulty':20
     },
+    {
+        'name':'star... manufacturing?', # 7
+        'reactants':[[3,3]],
+        'products':[13,-2],
+        'reactionDifficulty':1
+    },
 ]
 
 class constants:
@@ -194,6 +200,7 @@ class constants:
     # sound effects
     DIALOGUE_SOUND = pygame.mixer.Sound("sounds/dialogue.mp3")
     OBJECTIVE_SOUND = pygame.mixer.Sound("sounds/objective.wav")
+    RUMBLE_SOUND = pygame.mixer.Sound("sounds/rumble.wav")
     SOUND_PLAY_CHANCE = 5 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)
 
 class Particle:
@@ -221,8 +228,17 @@ class ObjectiveType(Enum):
     CURSOR_SIZE = 3
 
 class Objective:
-    def __init__(self, objective_type, target_particle, description):
+    def __init__(self, objective_type, target_particle, description, unlocks:list=None):
         self.objective_type = objective_type
         self.target_index = target_particle
         self.description = description
+        self.unlocks = unlocks
         
+class ScreenShake: # used to share "doScreenShake" across scripts, since python global variables are stupid. also have screenshake vars here to keep code clean-ish
+    doScreenShake = False
+    shakeTime = 0 # how long, in seconds, the shake has been happening for
+    screenShake = [0,0]
+    SHAKE_MAX_OFFSET = 20
+    SHAKE_MAX_CHANGE = 15
+    SHAKE_BUILDUP = 5
+    SHAKE_QUIT_TIME = 10 # seconds to wait until closing window

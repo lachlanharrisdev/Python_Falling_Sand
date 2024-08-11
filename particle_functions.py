@@ -309,20 +309,21 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
                                                 except:
                                                     pass
                                                 if _objectiveManager:
-                                                    # _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)]) # if reaction particle was the current objective, it would freeze rendering the rest of the particles. instead added to a temporary array which is then checked for each particle as objective
-                                                    if not old_type in _checkParticles:
-                                                        _checkParticles.append(old_type)
+                                                    #_objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)]) # if reaction particle was the current objective, it would freeze rendering the rest of the particles. instead added to a temporary array which is then checked for each particle as objective
+                                                    if not reactions[r]['products'][i.index(old_type)] in _checkParticles:
+                                                        _checkParticles.append(reactions[r]['products'][i.index(old_type)])
                                         else:
                                             pos = x.pos # position of the new particle
                                             old_type = x.type # store current reactant type
                                             del x # delete reactant
                                             CreateParticle(Particle(pos,reactions[r]['products'][i.index(old_type)]))
                                             if _objectiveManager:
-                                                # _objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
-                                                if not old_type in _checkParticles:
-                                                        _checkParticles.append(old_type)
-                                for k in _checkParticles:
-                                    _objectiveManager.check_reaction(reactions[r]['products'][i.index(k)])
+                                                #_objectiveManager.check_reaction(reactions[r]['products'][i.index(old_type)])
+                                                if not reactions[r]['products'][i.index(old_type)] in _checkParticles:
+                                                        _checkParticles.append(reactions[r]['products'][i.index(old_type)])
+                                #for k in _checkParticles:
+                                #    _objectiveManager.check_reaction(reactions[r]['products'][i.index(k)])
+                                return _checkParticles                        
                             
                 else: # if not a particle within the reaction type, not only skip reactant iteration but also skip reaction iteration
                     continue
@@ -333,10 +334,15 @@ def ReactionCheck(p:Particle,neighbours:dict,_objectiveManager=None):
 def UpdateWorld(_objectiveManager=None):
     particles = list(grid.values())
     neighbours = {}
+    objectiveCheck = []
     for p in particles:
         if p.active:
             neighbours = MoveParticle(p)
-            ReactionCheck(p,neighbours,_objectiveManager)
+            reactionResult = ReactionCheck(p,neighbours,_objectiveManager)
+            if not reactionResult == None:
+                for k in reactionResult:
+                    if not k in objectiveCheck:
+                        objectiveCheck.append(k)
             if p.pos[1] < -1:
                 try:
                     del grid[str(p.pos)]
@@ -389,9 +395,11 @@ def UpdateWorld(_objectiveManager=None):
         _fill = clamp(ceil(p.fill*constants.CELLSIZE)/constants.CELLSIZE,0,1)
         
         if particleTypes[p.type]['moveType'] == 'fluid' and particleTypes[p.type]['density'] > 0:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1]+(1-_fill))*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE * _fill))
+            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE+ScreenShake.screenShake[0],(p.pos[1]+(1-_fill))*(constants.CELLSIZE)+ScreenShake.screenShake[1],constants.CELLSIZE,constants.CELLSIZE * _fill))
         else:
-            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE,(p.pos[1])*(constants.CELLSIZE),constants.CELLSIZE,constants.CELLSIZE))
+            pygame.draw.rect(constants.DISPLAY,tuple(p.colour),(p.pos[0]*constants.CELLSIZE+ScreenShake.screenShake[0],(p.pos[1])*(constants.CELLSIZE)+ScreenShake.screenShake[1],constants.CELLSIZE,constants.CELLSIZE))
+    for k in objectiveCheck:
+        _objectiveManager.check_reaction(k) # check for objective complete only after all particles have been rendered
 
 # basic clamp function which I use surprisingly a lot, clamps x to between y (the low) & z (the high)
 def clamp(x,y,z) -> float:

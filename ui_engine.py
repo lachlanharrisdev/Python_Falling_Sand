@@ -1,6 +1,5 @@
 # hello sir
 # i've used a lot of c# coding conventions (unity) so sorry if it's confusing
-# key things are the way i've commented things (using the <summary> tags), calling functions that happen every tick as Update & probably more that I can't see yet
 # also i have used more modules than just pygame/sys but I believe they come installed with python
 # i've copied & pasted this to the top of every script just so you see this
 # pls give me bonus marks for not using AI :)
@@ -23,7 +22,7 @@ FOREGROUND = (2, 0, 0)
 TERTIARY = (230, 230, 232)
 TERTIARY_DARK = (200,200,205)
 
-SCROLL_CLAMP = (-500,0) # scroll limits, in pixels, for the tutorial screen
+SCROLL_CLAMP = (100,100) # scroll limits, in pixels, for the tutorial screen
 
 FONT = pygame.font.SysFont('Verdana', 28)
 TITLE_FONT = pygame.font.SysFont('Verdana', 69, bold=True) # nice
@@ -135,9 +134,9 @@ class MainMenu(Screen):
 class Tutorial(Screen):
     def __init__(self, uiManager):
         super().__init__(uiManager)
-        self.text = "blah blah blah tutorial stuff"
-        #self.images = [pygame.image.load('example.png')]  # no images yet
-        self.scrollOffset = 0 # how far the user has scrolled
+        self.text = None # "Welcome to Cosmic Cook! This is a 2d sandbox game where you simply have to complete objectives given by the narrator. This is a story game, so it is best to be played only once & not have your friends spoil surprises for you."
+        self.images = [pygame.image.load('instructions.png')]  # no images yet
+        self.scrollOffset = 20 # how far the user has scrolled
         self.backButton = Button("Back", 60, 30, self.go_back)
 
     def Update(self):
@@ -160,9 +159,55 @@ class Tutorial(Screen):
         except:
             # print("No images in loaded scene")
             pass 
-        surfaceText = FONT.render(self.text, True, FOREGROUND)
-        self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
+        # surfaceText = FONT.render(self.text, True, FOREGROUND)
+        # self.uiManager.screen.blit(surfaceText, (50, yOffset+70))
         self.backButton.Render(self.uiManager.screen)
+        
+
+        # render text, reuses dialogue code to automatically display in multiple lines
+        if not self.text == None:
+
+            screen_width = constants.WIDTH
+            screen_height = constants.HEIGHT
+
+            # Calculate the size of the dialogue box based on the text
+            lines = []
+            words = self.text.split(' ')
+            max_width = screen_width - 100  # Leave some padding
+            line = ""
+    
+            _letter = 0
+    
+            for word in words:
+                test_line = f"{line} {word}".strip()
+                if FONT.size(test_line)[0] <= max_width:
+                    line = test_line
+                else:
+                    lines.append(line)
+                    line = word
+            lines.append(line)
+
+            # Calculate box dimensions
+            box_padding = 10
+            max_line_width = max([FONT.size(line)[0] for line in lines])
+            box_width = max_line_width + 2 * box_padding
+            box_height = len(lines) * FONT.get_height() + 2 * box_padding
+    
+            # Position the box in the center-bottom of the screen
+            box_x = (screen_width - box_width) // 2
+            box_y = 0 + box_height - 50
+
+            # Create a surface for the dialogue box
+            box_surface = pygame.Surface((box_width, box_height))
+            box_surface.fill(BACKGROUND)
+
+            # Main loop to display each character one at a time
+            for i, line in enumerate(lines):
+                for j, char in enumerate(line):
+                    char_surface = FONT.render(char, True, FOREGROUND)
+                    box_surface.blit(char_surface, (box_padding + FONT.size(line[:j])[0], box_padding + i * FONT.get_height()))
+        
+            self.uiManager.screen.blit(box_surface, (box_x, box_y + yOffset))
         
     def go_back(self):
         self.uiManager.setScreen('main_menu')
@@ -186,7 +231,6 @@ class MainGame(Screen):
         super().Render()
         surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, BACKGROUND)
         self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))'''
-        print("request running = true")
         requestRunning = True
         RunGame()
         
@@ -244,18 +288,16 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
+                sys.exit()
 
         uiManager.Update()
         uiManager.Render()
         if requestRunning:
-            print("made it to pre running=false in uiengine")
             running=False
-            print("made it to post running=false in uiengine")
 
         pygame.display.flip()
         clock.tick(constants.FPS)
-
-    print("made it to sys.exit in uiengine")
     
 def RunGame():
     global running

@@ -27,6 +27,8 @@ objectiveReady=False # used to tell game loop whether it is ready to display fir
 screen = uiEngine.screen # used as a global, since it is called with multiple functions
 running = False # true when inside main game, false when in main menu or quit
 
+screenShake = [0,0]
+
 # dialogue boxes
 font = pygame.font.SysFont('Verdana', 18)
 
@@ -60,10 +62,24 @@ class Game:
     def Update(self):
         pygame.display.flip()
         self.clock.tick(constants.FPS)
-        pygame.display.set_caption(f'FPS: {self.clock.get_fps()}   Particle: {particleTypes[selected_particle]['name'].upper()}')
+        pygame.display.set_caption(f'FPS: {self.clock.get_fps()}   Particle: {particleTypes[unlockedParticles[selected_particle]]['name'].upper()}')
         global screen
         if screen == None:
             screen=uiEngine.screen
+        if ScreenShake.doScreenShake:
+            ScreenShake.screenShake = [clamp(screenShake[0] + randint(-ScreenShake.SHAKE_MAX_CHANGE,ScreenShake.SHAKE_MAX_CHANGE), -ScreenShake.SHAKE_MAX_OFFSET, ScreenShake.SHAKE_MAX_OFFSET) * clamp(ScreenShake.shakeTime / ScreenShake.SHAKE_BUILDUP,0,1), clamp(screenShake[1] + randint(-ScreenShake.SHAKE_MAX_CHANGE,ScreenShake.SHAKE_MAX_CHANGE), -ScreenShake.SHAKE_MAX_OFFSET, ScreenShake.SHAKE_MAX_OFFSET) * clamp(ScreenShake.shakeTime / ScreenShake.SHAKE_BUILDUP,0,1)]
+            ScreenShake.shakeTime += 1/constants.FPS # since the rest of the game doesnt use delta time
+            if ScreenShake.shakeTime > ScreenShake.SHAKE_QUIT_TIME:
+                pygame.display.quit()
+                time.sleep(2)
+                screen = pygame.display.set_mode((1300,720))
+                screen.blit(pygame.image.load("endgame.png").convert(), (0,0))
+                pygame.display.flip()
+                while True:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
         self.GameLoop()
         
 # manages main input events, calls updateWorld in particlefunctions.py & displays cursor
@@ -105,11 +121,11 @@ class Game:
                 destroying = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c:
-                if not selected_particle +1 >= len(particleTypes):
+                if not selected_particle +1 >= len(unlockedParticles):
                     selected_particle += 1
                 else:
                     selected_particle = 0
-                print(particleTypes[selected_particle]['name'].upper())
+                print(particleTypes[unlockedParticles[selected_particle]]['name'].upper())
             elif event.key == pygame.K_EQUALS and cursor_size < 3:
                 cursor_size += 1
                 self.objectives_manager.check_cursor_size(0)
@@ -117,10 +133,10 @@ class Game:
                 cursor_size -= 1
                 self.objectives_manager.check_cursor_size(0)
         if dragging:
-            self.objectives_manager.check_place_particle(selected_particle)
+            self.objectives_manager.check_place_particle(unlockedParticles[selected_particle])
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
-                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle)) 
+                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],unlockedParticles[selected_particle])) 
         elif destroying:
             for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):  
