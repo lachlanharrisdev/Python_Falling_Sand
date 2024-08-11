@@ -203,6 +203,7 @@ class constants:
     DIALOGUE_SOUND = pygame.mixer.Sound("sounds/dialogue.mp3")
     OBJECTIVE_SOUND = pygame.mixer.Sound("sounds/objective.wav")
     RUMBLE_SOUND = pygame.mixer.Sound("sounds/rumble.wav")
+    EXPLOSION_SOUND = pygame.mixer.Sound("sounds/explosion.wav")
     CLICK_SOUND = pygame.mixer.Sound("sounds/click.wav")
     MUSIC = "sounds/music.mp3"
     SOUND_PLAY_CHANCE = 6 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)

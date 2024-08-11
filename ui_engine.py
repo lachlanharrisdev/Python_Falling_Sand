@@ -159,7 +159,7 @@ class Tutorial(Screen):
         yOffset = self.scrollOffset
         try:
             for image in self.images:
-                self.uiManager.screen.blit(image, ((constants.WIDTH-image.get_width())/2, yOffset))
+                self.uiManager.screen.blit(image, ((constants.WIDTH-image.get_width())/2, yOffset+50))
                 yOffset += image.get_height() + 10
         except:
             # print("No images in loaded scene")

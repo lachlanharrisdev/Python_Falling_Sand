@@ -150,12 +150,12 @@ def SetupObjectives(manager):
     if GameParams.sandbox:
         manager.AddObjective(Objective(ObjectiveType.REACTION, 999, "This is the freeplay mode! Do whatever you want, no restrictions!", [1,2,4,5,6,7,8,9,10,11,12])) # unachievable reaction, unlocks everything from the beginning
     else:
-        manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Time for basic training. First, place a sand particle", [])) # spawn sand, unlocks nothing
-        manager.AddObjective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press - or = to change your cursor size, we'll start making BIG things!", [])) # change cursor size, unlocks water
+        manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Here we go again. First mission: click to place a sand particle", [])) # spawn sand, unlocks nothing
+        manager.AddObjective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press = to increase your cursor size (and - to decrease it)", [])) # change cursor size, unlocks water
         manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, look at your big cursor. Now press C to change particle types, & place some water.", [2])) # place water, unlocks wood
         manager.AddObjective(Objective(ObjectiveType.REACTION, 12, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try placing some wood & watch what happens when you water it.", [6])) # leaf reaction, unlocks fire liquid
-        manager.AddObjective(Objective(ObjectiveType.REACTION, 5, "We have life! Now see if you can set that tree on fire (I love arson :D)", [9])) # smoke reaction / decay, unlocks nothing
-        manager.AddObjective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time to let you get thinking... Let's see if you can figure out how to make glass.", [])) # glass reaction, unlocks hydrogen
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 5, "We have life! Now I wanna see it die. Set it on fire!!!", [9])) # smoke reaction / decay, unlocks nothing
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time for you get thinking... Let's see if you can figure out how to make glass.", [])) # glass reaction, unlocks hydrogen
         manager.AddObjective(Objective(ObjectiveType.REACTION, 13, "Good, you're actually competent. Now make... a star!", [3])) # star reaction, causes endgame
     
 def Clamp(x,y,z) -> float:

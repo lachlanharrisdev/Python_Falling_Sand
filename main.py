@@ -70,11 +70,13 @@ class Game:
             ScreenShake.screenShake = [Clamp(screenShake[0] + randint(-ScreenShake.SHAKE_MAX_CHANGE,ScreenShake.SHAKE_MAX_CHANGE), -ScreenShake.SHAKE_MAX_OFFSET, ScreenShake.SHAKE_MAX_OFFSET) * Clamp(ScreenShake.shakeTime / ScreenShake.SHAKE_BUILDUP,0,1), Clamp(screenShake[1] + randint(-ScreenShake.SHAKE_MAX_CHANGE,ScreenShake.SHAKE_MAX_CHANGE), -ScreenShake.SHAKE_MAX_OFFSET, ScreenShake.SHAKE_MAX_OFFSET) * Clamp(ScreenShake.shakeTime / ScreenShake.SHAKE_BUILDUP,0,1)]
             ScreenShake.shakeTime += 1/constants.FPS # since the rest of the game doesnt use delta time
             if ScreenShake.shakeTime > ScreenShake.SHAKE_QUIT_TIME:
+                constants.EXPLOSION_SOUND.play()
                 pygame.display.quit()
                 time.sleep(2)
                 screen = pygame.display.set_mode((1300,720))
                 screen.blit(pygame.image.load("endgame.png").convert(), (0,0))
                 pygame.display.flip()
+                pygame.mixer.music.play(-1,0,1500)
                 while True:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -82,6 +84,11 @@ class Game:
                             sys.exit()
         self.GameLoop()
         self.RenderHUD()
+        self.Pause()
+ 
+# manages pausing functionality, both displaying the pause button & loading the pause menu
+    def Pause(self):
+        pass
         
 # manages main input events, calls updateWorld in particlefunctions.py & displays cursor
     def GameLoop(self):
@@ -133,6 +140,7 @@ class Game:
     
         pygame.draw.rect(constants.DISPLAY, particleTypes[unlockedParticles[selected_particle]]['colour'], (*elementIndicatorPos, elementIndicatorSize, elementIndicatorSize))
         constants.DISPLAY.blit(textSurface, textPos)
+
         
 # rest of input management, debating whether i add keybinds system
     def HandleInput(self, event:pygame.event):

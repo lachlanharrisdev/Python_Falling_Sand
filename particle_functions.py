@@ -366,7 +366,8 @@ def UpdateWorld(_objectiveManager=None):
                             CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
                     else:
                         CreateParticle(Particle(pos,particleTypes[oldType]['decay'][0]), oldFill)
-                    _objectiveManager.CheckReaction(particleTypes[oldType]['decay'][0])
+                    if not particleTypes[oldType]['decay'][0] in objectiveCheck: # check for decayed particle in objectives
+                        objectiveCheck.append(particleTypes[oldType]['decay'][0])
                     continue
                 else:
                     del p
