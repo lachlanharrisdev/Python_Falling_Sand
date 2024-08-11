@@ -196,7 +196,7 @@ class constants:
     DISPLAY = pygame.display.set_mode((WIDTH,HEIGHT))
     CLOCK = pygame.time.Clock()
     CELLSIZE = 20
-    FLUID_STICKINESS = 1.2
+    FLUID_STICKINESS = 1.1
     
     # sound effects
     
@@ -204,8 +204,8 @@ class constants:
     OBJECTIVE_SOUND = pygame.mixer.Sound("sounds/objective.wav")
     RUMBLE_SOUND = pygame.mixer.Sound("sounds/rumble.wav")
     CLICK_SOUND = pygame.mixer.Sound("sounds/click.wav")
-    MUSIC = pygame.mixer.Sound("sounds/music.mp3")
-    SOUND_PLAY_CHANCE = 5 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)
+    MUSIC = "sounds/music.mp3"
+    SOUND_PLAY_CHANCE = 6 # chance of playing sound effect with state change (randint(0,SOUND_PLAY_CHANCE) == 0)
     
     # fonts
     

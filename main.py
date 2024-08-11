@@ -109,31 +109,30 @@ class Game:
         colour = (255,250,250)
         padding = 4
         offset = [25,25]
+        
         # current particle indicator
+        
         text = f"{particleTypes[unlockedParticles[selected_particle]]['name'].upper() } SELECTED"
-        text_surface = constants.FONT.render(text, True, colour)
+        textSurface = constants.FONT.render(text, True, colour)
     
-        # Calculate dimensions
-        text_width, text_height = text_surface.get_size()
-        square_size = text_height  # Square is as tall as the text
-        total_width = square_size + padding + text_width
+        # auto calculate dimensions
+        textWidth, textHeight = textSurface.get_size()
+        elementIndicatorSize = textHeight  # indicator is as tall as the text
+        sumWidth = elementIndicatorSize + padding + textWidth
     
-        # Define positions
-        square_position = (padding + offset[0], padding + offset[1])
-        text_position = (padding*2 + square_size + offset[0], padding + offset[1])
+        # change positions of text & indicator based on padding & the other's position
+        elementIndicatorPos = (padding + offset[0], padding + offset[1])
+        textPos = (padding*2 + elementIndicatorSize + offset[0], padding + offset[1])
     
-        # Draw the semi-transparent background
-        background_rect = pygame.Rect(0, 0, total_width + 2 * padding, text_height + 2 * padding)
-        background_surface = pygame.Surface((background_rect.width, background_rect.height), pygame.SRCALPHA)
-        background_surface.fill((0,0,0))
-        background_surface.set_alpha(150)
-        constants.DISPLAY.blit(background_surface, (offset[0],offset[1]))
+        # draws the background as a sem-transparent rectangle, accounting for text width & padding
+        backgroundRect = pygame.Rect(0, 0, sumWidth + 2 * padding, textHeight + 2 * padding)
+        backgroundSurface = pygame.Surface((backgroundRect.width, backgroundRect.height), pygame.SRCALPHA)
+        backgroundSurface.fill((0,0,0)) # change background colour here
+        backgroundSurface.set_alpha(150)
+        constants.DISPLAY.blit(backgroundSurface, (offset[0],offset[1]))
     
-        # Draw the colored square
-        pygame.draw.rect(constants.DISPLAY, particleTypes[unlockedParticles[selected_particle]]['colour'], (*square_position, square_size, square_size))
-    
-        # Draw the text
-        constants.DISPLAY.blit(text_surface, text_position)
+        pygame.draw.rect(constants.DISPLAY, particleTypes[unlockedParticles[selected_particle]]['colour'], (*elementIndicatorPos, elementIndicatorSize, elementIndicatorSize))
+        constants.DISPLAY.blit(textSurface, textPos)
         
 # rest of input management, debating whether i add keybinds system
     def HandleInput(self, event:pygame.event):
@@ -141,10 +140,10 @@ class Game:
         global destroying
         global selected_particle
         global cursor_size
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN: # placing particles
             if event.button == pygame.BUTTON_LEFT:
                 dragging = True
-            elif event.button == pygame.BUTTON_RIGHT:
+            elif event.button == pygame.BUTTON_RIGHT: # destroying particles
                 destroying = True
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == pygame.BUTTON_LEFT:
@@ -152,28 +151,28 @@ class Game:
             elif event.button == pygame.BUTTON_RIGHT:
                 destroying = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_c:
-                if not selected_particle +1 >= len(unlockedParticles):
+            if event.key == pygame.K_c: # change particle
+                if not selected_particle +1 >= len(unlockedParticles): # only switch between unlocked particles (sandbox just makes it so every particle starts unlocked)
                     selected_particle += 1
                 else:
                     selected_particle = 0
-                print(particleTypes[unlockedParticles[selected_particle]]['name'].upper())
-            elif event.key == pygame.K_EQUALS and cursor_size < 3:
+                print(particleTypes[unlockedParticles[selected_particle]]['name'].upper()) # for debugging, print out the name of the just selected particle
+            elif event.key == pygame.K_EQUALS and cursor_size < 3: # clamp cursor size to a max of 3
                 cursor_size += 1
                 self.objectives_manager.CheckCursorSize(0)
-            elif event.key == pygame.K_MINUS and cursor_size > 1:
+            elif event.key == pygame.K_MINUS and cursor_size > 1: # clamp cursor size to a min of 1
                 cursor_size -= 1
                 self.objectives_manager.CheckCursorSize(0)
-        if dragging:
-            self.objectives_manager.CheckPlaceParticle(unlockedParticles[selected_particle])
-            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
-                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    
-                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],unlockedParticles[selected_particle])) 
-        elif destroying:
-            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width):
+        if dragging: # if lmb
+            self.objectives_manager.CheckPlaceParticle(unlockedParticles[selected_particle]) # trigger a check for if the placed particle satisfies the objective
+            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width): # for the width of the mouse cursor
+                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    # for the height of the mouse cursor
+                    CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],unlockedParticles[selected_particle])) # create particle at x,y position (uses // for floor division, which divides & rounds down)
+        elif destroying: # if rmb
+            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width): # same as above but clears cells
                 for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):  
                     
-                    try: 
+                    try: # uses try in case particles dont exist in requested delete area
                         ClearCell(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle),[x//constants.CELLSIZE,y//constants.CELLSIZE]) 
                     except:
                         pass
@@ -185,7 +184,7 @@ class Game:
 
 # runs the main game screen rather than the ui engine screen
 def RunMainGame():
-    if uiEngine.requestRunning:
+    if uiEngine.requestRunning: # if the ui engine has requested the main game be run
         if not running:    
             game = Game() # python classes are weird but creating new game object (different to a gameObject for some stupid reason)
             game.run()
@@ -197,7 +196,7 @@ running = False
 if __name__ == '__main__':
     uiEngine.main()  
     if not running:    
-        game = Game() # python classes are weird but creating new game object (different to a gameObject for some stupid reason)
-        game.run()
-        running = True
+        game = Game() # run the game as a class to keep code clean
+        game.run() 
+        running = True # used in the end game when window is closed but code is still running
         #uiEngine.running = False  

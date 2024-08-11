@@ -237,6 +237,7 @@ class MainGame(Screen):
         surfaceText = FONT.render("Main Game - Press ESC to return to menu", True, BACKGROUND)
         self.uiManager.screen.blit(surfaceText, (50, constants.HEIGHT // 2))'''
         requestRunning = True
+        pygame.mixer.music.fadeout(2000)
         RunGame()
         
 
@@ -279,10 +280,10 @@ def main():
     uiManager = UIManager(screen)
     
     # play ambient music on repeat
-    music.load("sounds/music.mp3")
-    music.play(-1)
+    pygame.mixer.music.load("sounds/music.mp3")
+    pygame.mixer.music.play(-1)
     
-    music.set_volume(0.7)
+    music.set_volume(0.8)
 
     # Create and add screens
     uiManager.AddScreen('main_menu', MainMenu(uiManager))
