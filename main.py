@@ -19,8 +19,8 @@ grid = {} # grid[1,2] will return a particle with x position 1, y position 2 (2d
 dragging = False # if mouse down & mouse movement is detected
 destroying = False # if rmb & mouse movement detected
 selected_particle = 0 # index of selected praticle in particleTypes
-cursor_size = 1 # size of cursor in pixels width
-cursor_rect = pygame.Rect # cursor image
+cursorSize = 1 # size of cursor in pixels width
+cursorRect = pygame.Rect # cursor image
 
 objectiveReady=False # used to tell game loop whether it is ready to display first objective
 
@@ -114,7 +114,7 @@ class Game:
         
 # manages main input events, calls updateWorld in particlefunctions.py & displays cursor
     def GameLoop(self):
-        global cursor_rect
+        global cursorRect
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -124,8 +124,8 @@ class Game:
                 self.HandleInput(event)
         constants.DISPLAY.fill(constants.BACKGROUND)
         UpdateWorld(self.objectives_manager)
-        cursor_rect = pygame.Rect((pygame.mouse.get_pos()[0]//constants.CELLSIZE)*constants.CELLSIZE,(pygame.mouse.get_pos()[1]//constants.CELLSIZE)*constants.CELLSIZE,constants.CELLSIZE*cursor_size,constants.CELLSIZE*cursor_size)
-        pygame.draw.rect(constants.DISPLAY,(200,200,200),cursor_rect) # to add transparency, this has to be a surface that is blitted to the screen (not bothered)
+        cursorRect = pygame.Rect((pygame.mouse.get_pos()[0]//constants.CELLSIZE)*constants.CELLSIZE,(pygame.mouse.get_pos()[1]//constants.CELLSIZE)*constants.CELLSIZE,constants.CELLSIZE*cursorSize,constants.CELLSIZE*cursorSize)
+        pygame.draw.rect(constants.DISPLAY,(200,200,200),cursorRect) # to add transparency, this has to be a surface that is blitted to the screen (not bothered)
         constants.CLOCK.tick(constants.FPS)
 
         global objectiveReady
@@ -163,13 +163,38 @@ class Game:
         pygame.draw.rect(constants.DISPLAY, particleTypes[unlockedParticles[selected_particle]]['colour'], (*elementIndicatorPos, elementIndicatorSize, elementIndicatorSize))
         constants.DISPLAY.blit(textSurface, textPos)
 
+
+        # current objective indicator
+        
+        if GameParams.sandbox:
+            return # end this function early if in sandbox mode (ending early stops the rendering of the current objective)
+
+        offset = [25, textHeight + padding*2 + 25]
+
+        goal = self.objectives_manager.current_objective.shortDesc
+        print(goal)
+        text = f"GOAL: {goal}"
+        textSurface = constants.FONT.render(text, True, colour)
+        
+        textWidth, textHeight = textSurface.get_size()
+        sumWidth = padding + textWidth
+        
+        textPos = (padding*2 + offset[0], padding + offset[1])
+        
+        backgroundRect = pygame.Rect(0, 0, sumWidth + 2 * padding, textHeight + 2 * padding)
+        backgroundSurface = pygame.Surface((backgroundRect.width, backgroundRect.height), pygame.SRCALPHA)
+        backgroundSurface.fill((0,0,0)) # change background colour here
+        backgroundSurface.set_alpha(150)
+        constants.DISPLAY.blit(backgroundSurface, (offset[0],offset[1]))
+        
+        constants.DISPLAY.blit(textSurface, textPos)
         
 # rest of input management, debating whether i add keybinds system
     def HandleInput(self, event:pygame.event):
         global dragging
         global destroying
         global selected_particle
-        global cursor_size
+        global cursorSize
         if event.type == pygame.MOUSEBUTTONDOWN: # placing particles
             if event.button == pygame.BUTTON_LEFT:
                 dragging = True
@@ -187,20 +212,20 @@ class Game:
                 else:
                     selected_particle = 0
                 print(particleTypes[unlockedParticles[selected_particle]]['name'].upper()) # for debugging, print out the name of the just selected particle
-            elif event.key == pygame.K_EQUALS and cursor_size < 2: # clamp cursor size to a max of 2 (would be 3 but school laptop performance is incredibly bad)
-                cursor_size += 1
+            elif event.key == pygame.K_EQUALS and cursorSize < 2: # clamp cursor size to a max of 2 (would be 3 but school laptop performance is incredibly bad)
+                cursorSize += 1
                 self.objectives_manager.CheckCursorSize(0)
-            elif event.key == pygame.K_MINUS and cursor_size > 1: # clamp cursor size to a min of 1
-                cursor_size -= 1
+            elif event.key == pygame.K_MINUS and cursorSize > 1: # clamp cursor size to a min of 1
+                cursorSize -= 1
                 self.objectives_manager.CheckCursorSize(0)
         if dragging: # if lmb
             self.objectives_manager.CheckPlaceParticle(unlockedParticles[selected_particle]) # trigger a check for if the placed particle satisfies the objective
-            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width): # for the width of the mouse cursor
-                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):    # for the height of the mouse cursor
+            for x in range(cursorRect.left,cursorRect.left+cursorRect.width): # for the width of the mouse cursor
+                for y in range(cursorRect.top,cursorRect.top+cursorRect.height):    # for the height of the mouse cursor
                     CreateParticle(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],unlockedParticles[selected_particle])) # create particle at x,y position (uses // for floor division, which divides & rounds down)
         elif destroying: # if rmb
-            for x in range(cursor_rect.left,cursor_rect.left+cursor_rect.width): # same as above but clears cells
-                for y in range(cursor_rect.top,cursor_rect.top+cursor_rect.height):  
+            for x in range(cursorRect.left,cursorRect.left+cursorRect.width): # same as above but clears cells
+                for y in range(cursorRect.top,cursorRect.top+cursorRect.height):  
                     
                     try: # uses try in case particles dont exist in requested delete area
                         ClearCell(Particle([x//constants.CELLSIZE,y//constants.CELLSIZE],selected_particle),[x//constants.CELLSIZE,y//constants.CELLSIZE]) 

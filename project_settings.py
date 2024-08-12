@@ -239,11 +239,12 @@ class ObjectiveType(Enum):
     CURSOR_SIZE = 3
 
 class Objective:
-    def __init__(self, objective_type, target_particle, description, unlocks:list=None):
+    def __init__(self, objective_type, target_particle, description, unlocks:list=None, desc:str="None"):
         self.objective_type = objective_type
         self.target_index = target_particle
         self.description = description
         self.unlocks = unlocks
+        self.shortDesc = desc
         
 class ScreenShake: # used to share "doScreenShake" across scripts, since python global variables are stupid. also have screenshake vars here to keep code clean-ish
     doScreenShake = False

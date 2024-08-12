@@ -6,11 +6,13 @@
 
 # this script manages the actual progression system for the player, including dialogue boxes, checking if certain elements are crafted, and providing an array of unlocked placable particles
 
+import string
+from tokenize import String
 import pygame
 import time
 from project_settings import *
 
-def DisplayDialogue(text, isObjective=False, char_delay=0.035, text_color=(255, 255, 255), font=None, box_color=(15, 15, 15), sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
+def DisplayDialogue(text, isObjective=False, char_delay=0.032, text_color=(255, 255, 255), font=None, box_color=(15, 15, 15), sound_effect=constants.DIALOGUE_SOUND, sound_interval=2):
     if font is None:
         font = constants.DIALOGUE_FONT
     
@@ -65,13 +67,22 @@ def DisplayDialogue(text, isObjective=False, char_delay=0.035, text_color=(255, 
                 _letter = 0
             pygame.display.get_surface().blit(box_surface, (box_x, box_y))
             pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    char_delay = 0 # skip through rest of dialogue without forgetting to render rest of letters
+                    isObjective = True # cheesy way to just stop the sound effects from playing (since the objective sound is only played BEFORE this loop)
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    pass # need this line to fix an issue where skipping dialogue would cause player to not stop spawning in particle until clicking again
             if not (char == "." or char == "," or char == ";" or char == "!"):
                 time.sleep(char_delay)
             else:
                 time.sleep(char_delay*2) # sleep longer if the char is something that would be paused on IRL (full stops, commas, etc.)
     
     pygame.display.update()
-    time.sleep(1.5) # "linger" time after dialogue done generating
+    time.sleep(1.7) # "linger" time after dialogue done generating
     
 
 
@@ -109,8 +120,12 @@ class ObjectivesManager:
             for i in self.current_objective.unlocks:
                 unlockedParticles.append(i)
     
+    # used by main.py, returns a short description representing the current active objective
+    def GetCurrentObjective(self) -> string:
+        return "test"
+    
     # used to have bonus functionality, but kept here in case change need to be made between objective dialogue & other dialogue
-    def DisplayObjectiveDialogue(self, text, _objective=False, _charDelay=0.035):
+    def DisplayObjectiveDialogue(self, text, _objective=False, _charDelay=0.032):
         DisplayDialogue(text, _objective, _charDelay)
 
     # called whenever user manually places particles, if its current objective and particletype matches objective then CompleteObjective() is called
@@ -136,7 +151,7 @@ class ObjectivesManager:
     # called when the star element is crafted
     def EndGame(self):
         constants.RUMBLE_SOUND.play()
-        DisplayDialogue("Wait... I should NOT have told you to do that... RUN!!!", False, 0.035, (200,20,20))
+        DisplayDialogue("Wait... I should NOT have told you to do that... RUN!!!", False, 0.037, (200,20,20))
         ScreenShake.doScreenShake = True
         
     # called when the criteria of the objective is successfully met
@@ -150,14 +165,14 @@ def SetupObjectives(manager):
     if GameParams.sandbox:
         manager.AddObjective(Objective(ObjectiveType.REACTION, 999, "This is the freeplay mode! Do whatever you want, no restrictions!", [1,2,4,5,6,7,8,9,10,11,12])) # unachievable reaction, unlocks everything from the beginning
     else:
-        # manager.AddObjective(Objective(ObjectiveType.REACTION, 13, "DEBUG:REACT_STAR", [3])) # used for debugging the endgame (just skips to endgame functions)
-        manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Here we go again. First mission: click to place a sand particle", [])) # spawn sand, unlocks nothing
-        manager.AddObjective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press = to increase your cursor size (and - to decrease it)", [])) # change cursor size, unlocks water
-        manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, look at your big cursor. Now press C to change particle types, & place some water.", [2])) # place water, unlocks wood
-        manager.AddObjective(Objective(ObjectiveType.REACTION, 12, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try placing some wood & watch what happens when you water it.", [6])) # leaf reaction, unlocks fire liquid
-        manager.AddObjective(Objective(ObjectiveType.REACTION, 5, "We have life! Now I wanna see it die. Set it on fire!!!", [9])) # smoke reaction / decay, unlocks nothing
-        manager.AddObjective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time for you get thinking... Let's see if you can figure out how to make glass.", [])) # glass reaction, unlocks hydrogen
-        manager.AddObjective(Objective(ObjectiveType.REACTION, 13, "Good, you're actually competent. Now make... a star!", [3])) # star reaction, causes endgame
+        # manager.AddObjective(Objective(ObjectiveType.REACTION, 13, "DEBUG:REACT_STAR", [3], "craft star")) # used for debugging the endgame (just skips to endgame functions)
+        manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 0, "So... the new cosmic chef is here. Here we go again. First mission: click to place a sand particle", [], "PLACE SAND")) # spawn sand, unlocks nothing
+        manager.AddObjective(Objective(ObjectiveType.CURSOR_SIZE, 0, "Cool... you made a single particle. That's nothing though. Press = to increase your cursor size (and - to decrease it)", [], "+ CURSOR SIZE")) # change cursor size, unlocks water
+        manager.AddObjective(Objective(ObjectiveType.PLACE_PARTICLE, 2, "There we go, look at your big cursor. Now press C to change particle types, & place some water.", [2], "PLACE WATER")) # place water, unlocks wood
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 12, "The holy god spent a lot of time making those fluid physics. Thank him for that. Now, try placing some wood & watch what happens when you water it.", [6], "WATER WOOD")) # leaf reaction, unlocks fire liquid
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 5, "We have life! Now I wanna see it die. Set it on fire!!!", [9], "BURN TREE")) # smoke reaction / decay, unlocks nothing
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 10, "Yayyy! Time for you get thinking... Let's see if you can figure out how to make glass.", [], "FORGE GLASS")) # glass reaction, unlocks hydrogen
+        manager.AddObjective(Objective(ObjectiveType.REACTION, 13, "Good, you're actually competent. Now make... a star!", [3], "CRAFT STAR")) # star reaction, causes endgame
     
 def Clamp(x,y,z) -> float:
     i = max(y, min(x, z))
