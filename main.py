@@ -172,7 +172,6 @@ class Game:
         offset = [25, textHeight + padding*2 + 25]
 
         goal = self.objectives_manager.current_objective.shortDesc
-        print(goal)
         text = f"GOAL: {goal}"
         textSurface = constants.FONT.render(text, True, colour)
         
@@ -195,7 +194,7 @@ class Game:
         global destroying
         global selected_particle
         global cursorSize
-        if event.type == pygame.MOUSEBUTTONDOWN: # placing particles
+        '''if event.type == pygame.MOUSEBUTTONDOWN: # placing particles
             if event.button == pygame.BUTTON_LEFT:
                 dragging = True
             elif event.button == pygame.BUTTON_RIGHT: # destroying particles
@@ -204,8 +203,9 @@ class Game:
             if event.button == pygame.BUTTON_LEFT:
                 dragging = False
             elif event.button == pygame.BUTTON_RIGHT:
-                destroying = False
-        elif event.type == pygame.KEYDOWN:
+                destroying = False''' # made obselete due to pygame.mouse.get_pressed (voids the need to detect for press & release which is home for a lot of bugs)
+        dragging, middle, destroying = pygame.mouse.get_pressed(3)    
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c: # change particle
                 if not selected_particle +1 >= len(unlockedParticles): # only switch between unlocked particles (sandbox just makes it so every particle starts unlocked)
                     selected_particle += 1
