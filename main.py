@@ -121,7 +121,7 @@ class Game:
                 pygame.quit()
                 sys.exit()
             else:
-                self.HandleInput(event)
+                self.InputHandler(event)
         constants.DISPLAY.fill(constants.BACKGROUND)
         UpdateWorld(self.objectives_manager)
         cursorRect = pygame.Rect((pygame.mouse.get_pos()[0]//constants.CELLSIZE)*constants.CELLSIZE,(pygame.mouse.get_pos()[1]//constants.CELLSIZE)*constants.CELLSIZE,constants.CELLSIZE*cursorSize,constants.CELLSIZE*cursorSize)
@@ -190,7 +190,7 @@ class Game:
         constants.DISPLAY.blit(textSurface, textPos)
         
 # rest of input management, debating whether i add keybinds system
-    def HandleInput(self, event:pygame.event):
+    def InputHandler(self, event:pygame.event):
         global dragging
         global destroying
         global selected_particle

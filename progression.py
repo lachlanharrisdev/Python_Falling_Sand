@@ -54,12 +54,15 @@ def DisplayDialogue(text, isObjective=False, char_delay=0.032, text_color=(255, 
     if isObjective:
         constants.OBJECTIVE_SOUND.play() # play objective sound only if the dialogue is meant for the "objective complete!" text
 
+    global dragging # fixing a bug where dialogue sometimes causes dragging to be set to true
+
     # Main loop to display each character one at a time
     for i, line in enumerate(lines): # for each line determined by the previous algojrithm
         for j, char in enumerate(line): # for each character within the line
             char_surface = font.render(char, True, text_color)
             box_surface.blit(char_surface, (box_padding + font.size(line[:j])[0], box_padding + i * font.get_height())) # map letters onto a surface for the box, treating it like a single image that can be moved around
 
+            dragging = False
             # play sound ever sound_interval letters, and if they are not a silent letter
             _letter += 1
             if not isObjective and sound_effect and _letter >= sound_interval and not (char == " " or char == "." or char == ","):
@@ -71,9 +74,9 @@ def DisplayDialogue(text, isObjective=False, char_delay=0.032, text_color=(255, 
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    char_delay = 0 # skip through rest of dialogue without forgetting to render rest of letters
-                    isObjective = True # cheesy way to just stop the sound effects from playing (since the objective sound is only played BEFORE this loop)
+                #elif event.type == pygame.MOUSEBUTTONDOWN:
+                #    char_delay = 0 # skip through rest of dialogue without forgetting to render rest of letters
+                #    isObjective = True # cheesy way to just stop the sound effects from playing (since the objective sound is only played BEFORE this loop)
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pass # need this line to fix an issue where skipping dialogue would cause player to not stop spawning in particle until clicking again
             if not (char == "." or char == "," or char == ";" or char == "!"):
@@ -83,6 +86,7 @@ def DisplayDialogue(text, isObjective=False, char_delay=0.032, text_color=(255, 
     
     pygame.display.update()
     time.sleep(1.7) # "linger" time after dialogue done generating
+    dragging = False
     
 
 
@@ -120,13 +124,11 @@ class ObjectivesManager:
             for i in self.current_objective.unlocks:
                 unlockedParticles.append(i)
     
-    # used by main.py, returns a short description representing the current active objective
-    def GetCurrentObjective(self) -> string:
-        return "test"
-    
     # used to have bonus functionality, but kept here in case change need to be made between objective dialogue & other dialogue
     def DisplayObjectiveDialogue(self, text, _objective=False, _charDelay=0.032):
+        global dragging
         DisplayDialogue(text, _objective, _charDelay)
+        dragging = False
 
     # called whenever user manually places particles, if its current objective and particletype matches objective then CompleteObjective() is called
     def CheckPlaceParticle(self, particle_index):
@@ -156,8 +158,10 @@ class ObjectivesManager:
         
     # called when the criteria of the objective is successfully met
     def CompleteObjective(self):
+        global dragging
         self.DisplayObjectiveDialogue("Objective completed!", True, 0.015)
         self.RetrieveObjective()
+        dragging = False
 
 # Example of adding objectives
 def SetupObjectives(manager):
