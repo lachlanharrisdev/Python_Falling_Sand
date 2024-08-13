@@ -74,9 +74,9 @@ def DisplayDialogue(text, isObjective=False, char_delay=0.032, text_color=(255, 
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                #elif event.type == pygame.MOUSEBUTTONDOWN:
-                #    char_delay = 0 # skip through rest of dialogue without forgetting to render rest of letters
-                #    isObjective = True # cheesy way to just stop the sound effects from playing (since the objective sound is only played BEFORE this loop)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    char_delay = 0 # skip through rest of dialogue without forgetting to render rest of letters
+                    isObjective = True # cheesy way to just stop the sound effects from playing (since the objective sound is only played BEFORE this loop)
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pass # need this line to fix an issue where skipping dialogue would cause player to not stop spawning in particle until clicking again
             if not (char == "." or char == "," or char == ";" or char == "!"):
